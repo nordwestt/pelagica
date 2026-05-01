@@ -109,5 +109,14 @@
     "upload_image": "Upload Image",
     "uploading": "Uploading...",
     "upload": "Upload",
-    "upcoming_episodes": "Upcoming Episodes"
+    "upcoming_episodes": "Upcoming Episodes",
+    "subtitles": "Subtitles",
+    "subtitle_download_description": "Download available subtitles for this item.",
+    "no_subtitles_available": "No subtitles available for this item.",
+    "unknown_subtitle": "Unknown subtitle",
+    "image_based": "Image-based",
+    "download": "Download",
+    "original": "Original",
+    "download_original_file": "Download original file",
+    "open_in_new_tab": "Open in new tab"
 }

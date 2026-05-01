@@ -134,7 +134,7 @@ const EpisodePage = ({ item, config }: EpisodePageProps) => {
                             showDownloadButton={config.itemPage?.showDownloadButton}
                         />
                         <MediaInfoDialog streams={item.MediaStreams || []} />
-                        <ItemAdminButton item={item} />
+                        <ItemAdminButton item={item} showSubtitlesButton={true} />
                     </div>
                     <p>{item.Overview}</p>
                 </div>

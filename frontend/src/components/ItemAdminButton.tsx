@@ -6,20 +6,28 @@ import {
     DropdownMenuTrigger,
 } from './ui/dropdown-menu';
 import { Button } from './ui/button';
-import { EllipsisVertical, Image, RotateCcw, Trash2 } from 'lucide-react';
+import { Captions, EllipsisVertical, Image, RotateCcw, Trash2 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { useCurrentUser } from '@/hooks/api/useCurrentUser';
 import { useRef } from 'react';
 import ManageImageButton from './ManageImageButton';
 import RefreshItemMetadataButton from './RefreshItemMetadataButton';
 import MediaDeleteButton from './MediaDeleteButton';
+import SubtitleDownloadDialog from '../pages/Item/SubtitleDownloadDialog';
 
-const ItemAdminButton = ({ item }: { item: BaseItemDto }) => {
+const ItemAdminButton = ({
+    item,
+    showSubtitlesButton = false,
+}: {
+    item: BaseItemDto;
+    showSubtitlesButton?: boolean;
+}) => {
     const { t } = useTranslation('item');
     const { data: currentUser } = useCurrentUser();
     const manageImagesTriggerRef = useRef<HTMLButtonElement>(null);
     const refreshMetadataTriggerRef = useRef<HTMLButtonElement>(null);
     const deleteTriggerRef = useRef<HTMLButtonElement>(null);
+    const subtitlesTriggerRef = useRef<HTMLButtonElement>(null);
 
     if (currentUser?.Policy?.IsAdministrator !== true) return null;
 
@@ -32,6 +40,16 @@ const ItemAdminButton = ({ item }: { item: BaseItemDto }) => {
                     </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align={'end'}>
+                    {showSubtitlesButton && (
+                        <DropdownMenuItem
+                            onClick={() => {
+                                setTimeout(() => subtitlesTriggerRef.current?.click(), 0);
+                            }}
+                        >
+                            <Captions />
+                            {t('subtitles')}
+                        </DropdownMenuItem>
+                    )}
                     <DropdownMenuItem
                         onClick={() => {
                             setTimeout(() => manageImagesTriggerRef.current?.click(), 0);
@@ -60,6 +78,10 @@ const ItemAdminButton = ({ item }: { item: BaseItemDto }) => {
             </DropdownMenu>
 
             <div style={{ display: 'none' }}>
+                <SubtitleDownloadDialog
+                    item={item}
+                    trigger={<button ref={subtitlesTriggerRef} />}
+                />
                 <ManageImageButton item={item} trigger={<button ref={manageImagesTriggerRef} />} />
                 <RefreshItemMetadataButton
                     item={item}

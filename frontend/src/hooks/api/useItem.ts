@@ -27,6 +27,7 @@ export function useItem(
                     'MediaStreams',
                     'ProductionLocations',
                     'RemoteTrailers',
+                    'MediaSources',
                 ],
                 enableUserData,
                 userId,
