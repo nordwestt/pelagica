@@ -1,10 +1,14 @@
 import { useEditItemMetadata } from '@/hooks/api/useEditItemMetadata';
-import type { BaseItemDto } from '@jellyfin/sdk/lib/generated-client/models';
+import type {
+    BaseItemDto,
+    Video3DFormat,
+    MetadataField,
+} from '@jellyfin/sdk/lib/generated-client/models';
 import { getApi } from '@/api/getApi';
 import { getUserLibraryApi } from '@jellyfin/sdk/lib/utils/api/user-library-api';
 import { getItemUpdateApi } from '@jellyfin/sdk/lib/utils/api/item-update-api';
 import { useQuery } from '@tanstack/react-query';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, startTransition } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Trash2 } from 'lucide-react';
 import {
@@ -20,7 +24,15 @@ import { Button } from './ui/button';
 import { Checkbox } from './ui/checkbox';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
 
-type MetadataType = 'Basic' | 'ExternalIds' | 'Genres' | 'Tags' | 'People' | 'Studios' | 'MetadataSettings' | 'EnabledFields';
+type MetadataType =
+    | 'Basic'
+    | 'ExternalIds'
+    | 'Genres'
+    | 'Tags'
+    | 'People'
+    | 'Studios'
+    | 'MetadataSettings'
+    | 'EnabledFields';
 
 const EditItemMetadataButton = ({
     item,
@@ -47,9 +59,9 @@ const EditItemMetadataButton = ({
     const [parentalRating, setParentalRating] = useState('');
     const [customRating, setCustomRating] = useState('');
     const [originalAspectRatio, setOriginalAspectRatio] = useState('');
-    const [threedFormat, setThreedFormat] = useState('');
+    const [threedFormat, setThreedFormat] = useState<Video3DFormat | 'None' | ''>('');
 
-    const [providerIds, setProviderIds] = useState<Record<string, string>>({});
+    const [providerIds, setProviderIds] = useState<Record<string, string | null>>({});
     const [genres, setGenres] = useState<string[]>([]);
     const [genreInput, setGenreInput] = useState('');
     const [tags, setTags] = useState<string[]>([]);
@@ -59,10 +71,9 @@ const EditItemMetadataButton = ({
     const [seriesNumber, setSeriesNumber] = useState('');
     const [episodeNumber, setEpisodeNumber] = useState('');
     const [lockData, setLockData] = useState(false);
-    const [lockedFields, setLockedFields] = useState<string[]>([]);
+    const [lockedFields, setLockedFields] = useState<MetadataField[]>([]);
     const [preferredLanguage, setPreferredLanguage] = useState('');
     const [preferredCountry, setPreferredCountry] = useState('');
-
 
     const { editItemMetadata, isSaving } = useEditItemMetadata(() => {
         setIsEditDialogOpen(false);
@@ -89,30 +100,33 @@ const EditItemMetadataButton = ({
 
     useEffect(() => {
         if (!fullItem) return;
-        setTitle(fullItem.Name ?? '');
-        setPath(fullItem.Path ?? '');
-        setOriginalTitle(fullItem.OriginalTitle ?? '');
-        setSortTitle(fullItem.ForcedSortName ?? '');
-        setOverview(fullItem.Overview ?? '');
-        setTagline(fullItem.Taglines?.[0] ?? '');
-        setCommunityRating(String(fullItem.CommunityRating ?? ''));
-        setCriticsRating(String(fullItem.CriticRating ?? ''));
-        setParentalRating(fullItem.OfficialRating ?? '');
-        setCustomRating(fullItem.CustomRating ?? '');
-        setThreedFormat(fullItem.Video3DFormat ?? 'None');
-        setYear(String(fullItem.ProductionYear ?? ''));
-        setReleaseDate(fullItem.PremiereDate?.split('T')[0] ?? '');
-        setProviderIds(fullItem.ProviderIds ?? {});
-        setGenres(fullItem.Genres ?? []);
-        setTags(fullItem.Tags ?? []);
-        setStudio(fullItem.Studios?.map(s => s.Name ?? '') ?? []);
-        setSeriesNumber(fullItem.ParentIndexNumber ?? '');
-        setEpisodeNumber(fullItem.IndexNumber ?? '');
-        setLockData(fullItem.LockData ?? false);
-        setLockedFields(fullItem.LockedFields ?? []);
-        setPreferredLanguage(fullItem.PreferredMetadataLanguage ?? '');
-        setPreferredCountry(fullItem.PreferredMetadataCountryCode ?? '');
-
+        startTransition(() => {
+            setTitle(fullItem.Name ?? '');
+            setPath(fullItem.Path ?? '');
+            setOriginalTitle(fullItem.OriginalTitle ?? '');
+            setSortTitle(fullItem.ForcedSortName ?? '');
+            setOverview(fullItem.Overview ?? '');
+            setTagline(fullItem.Taglines?.[0] ?? '');
+            setCommunityRating(String(fullItem.CommunityRating ?? ''));
+            setCriticsRating(String(fullItem.CriticRating ?? ''));
+            setParentalRating(fullItem.OfficialRating ?? '');
+            setCustomRating(fullItem.CustomRating ?? '');
+            setThreedFormat((fullItem.Video3DFormat ?? 'None') as Video3DFormat | 'None');
+            setYear(String(fullItem.ProductionYear ?? ''));
+            setReleaseDate(fullItem.PremiereDate?.split('T')[0] ?? '');
+            setProviderIds((fullItem.ProviderIds ?? {}) as Record<string, string | null>);
+            setGenres(fullItem.Genres ?? []);
+            setTags(fullItem.Tags ?? []);
+            setStudio(fullItem.Studios?.map((s) => s.Name ?? '') ?? []);
+            setSeriesNumber(
+                fullItem.ParentIndexNumber != null ? String(fullItem.ParentIndexNumber) : ''
+            );
+            setEpisodeNumber(fullItem.IndexNumber != null ? String(fullItem.IndexNumber) : '');
+            setLockData(fullItem.LockData ?? false);
+            setLockedFields((fullItem.LockedFields ?? []) as MetadataField[]);
+            setPreferredLanguage(fullItem.PreferredMetadataLanguage ?? '');
+            setPreferredCountry(fullItem.PreferredMetadataCountryCode ?? '');
+        });
     }, [fullItem]);
 
     const addTag = () => {
@@ -160,16 +174,21 @@ const EditItemMetadataButton = ({
                 CriticRating: criticsRating ? parseFloat(criticsRating) : undefined,
                 OfficialRating: parentalRating,
                 CustomRating: customRating,
-                Video3DFormat: threedFormat === 'None' ? undefined : threedFormat,
+                Video3DFormat:
+                    threedFormat === 'None' ? undefined : (threedFormat as Video3DFormat),
                 ProductionYear: year ? parseInt(year) : undefined,
                 PremiereDate: releaseDate ? `${releaseDate}T00:00:00.0000000Z` : undefined,
                 Genres: genres,
                 Tags: tags,
-                Studios: studio.map(name => ({ Name: name })),
+                Studios: studio.map((name) => ({ Name: name })),
                 ForcedSortName: sortTitle,
-                SeriesNumber: seriesNumber ? parseInt(seriesNumber) : undefined,
-                EpisodeNumber: episodeNumber ? parseInt(episodeNumber) : undefined,
-                ProviderIds: providerIds,
+                ParentIndexNumber: seriesNumber ? parseInt(seriesNumber) : undefined,
+                IndexNumber: episodeNumber ? parseInt(episodeNumber) : undefined,
+                ProviderIds: Object.fromEntries(
+                    Object.entries(providerIds)
+                        .filter(([, v]) => v != null)
+                        .map(([k, v]) => [k, v as string])
+                ) as Record<string, string>,
                 LockData: lockData,
                 LockedFields: lockedFields,
                 PreferredMetadataLanguage: preferredLanguage,
@@ -203,17 +222,21 @@ const EditItemMetadataButton = ({
                                 <SelectItem value={'Tags'}>{t('tags')}</SelectItem>
                                 <SelectItem value={'People'}>{t('people')}</SelectItem>
                                 <SelectItem value={'Studios'}>{t('studios')}</SelectItem>
-                                <SelectItem value={'MetadataSettings'}>{t('metadata_settings')}</SelectItem>
-                                <SelectItem value={'EnabledFields'}>{t('enabled_fields')}</SelectItem>
-
+                                <SelectItem value={'MetadataSettings'}>
+                                    {t('metadata_settings')}
+                                </SelectItem>
+                                <SelectItem value={'EnabledFields'}>
+                                    {t('enabled_fields')}
+                                </SelectItem>
                             </SelectContent>
                         </Select>
                     </div>
                     {metadataType === 'Basic' && (
                         <div className="flex flex-col gap-4">
-
                             <div className="flex flex-col gap-1">
-                                <label className="text-sm font-medium text-muted-foreground">{t('path')}</label>
+                                <label className="text-sm font-medium text-muted-foreground">
+                                    {t('path')}
+                                </label>
                                 <input
                                     type="text"
                                     value={path}
@@ -223,7 +246,9 @@ const EditItemMetadataButton = ({
                             </div>
 
                             <div className="flex flex-col gap-1">
-                                <label className="text-sm font-medium text-muted-foreground">{t('title')}</label>
+                                <label className="text-sm font-medium text-muted-foreground">
+                                    {t('title')}
+                                </label>
                                 <input
                                     type="text"
                                     value={title}
@@ -232,7 +257,9 @@ const EditItemMetadataButton = ({
                                 />
                             </div>
                             <div className="flex flex-col gap-1">
-                                <label className="text-sm font-medium text-muted-foreground">{t('original_title')}</label>
+                                <label className="text-sm font-medium text-muted-foreground">
+                                    {t('original_title')}
+                                </label>
                                 <input
                                     type="text"
                                     value={originalTitle}
@@ -241,7 +268,9 @@ const EditItemMetadataButton = ({
                                 />
                             </div>
                             <div className="flex flex-col gap-1">
-                                <label className="text-sm font-medium text-muted-foreground">{t('sort_title')}</label>
+                                <label className="text-sm font-medium text-muted-foreground">
+                                    {t('sort_title')}
+                                </label>
                                 <input
                                     type="text"
                                     value={sortTitle}
@@ -250,7 +279,9 @@ const EditItemMetadataButton = ({
                                 />
                             </div>
                             <div className="flex flex-col gap-1">
-                                <label className="text-sm font-medium text-muted-foreground">{t('date_added')}</label>
+                                <label className="text-sm font-medium text-muted-foreground">
+                                    {t('date_added')}
+                                </label>
                                 <input
                                     type="date"
                                     value={dateAdded}
@@ -259,30 +290,36 @@ const EditItemMetadataButton = ({
                                 />
                             </div>
                             {fullItem?.Type === 'Episode' && (
-                              <div className="flex gap-4">
-                                  <div className="flex flex-col gap-1 flex-1">
-                                      <label className="text-sm font-medium text-muted-foreground">{t('series_number')}</label>
-                                      <input
-                                          type="number"
-                                          value={seriesNumber}
-                                          onChange={(e) => setSeriesNumber(e.target.value)}
-                                          className="text-sm rounded-md border px-3 py-2"
-                                      />
-                                  </div>
-                                  <div className="flex flex-col gap-1 flex-1">
-                                      <label className="text-sm font-medium text-muted-foreground">{t('episode_number')}</label>
-                                      <input
-                                          type="number"
-                                          value={episodeNumber}
-                                          onChange={(e) => setEpisodeNumber(e.target.value)}
-                                          className="text-sm rounded-md border px-3 py-2"
-                                      />
-                                  </div>
-                              </div>
+                                <div className="flex gap-4">
+                                    <div className="flex flex-col gap-1 flex-1">
+                                        <label className="text-sm font-medium text-muted-foreground">
+                                            {t('series_number')}
+                                        </label>
+                                        <input
+                                            type="number"
+                                            value={seriesNumber}
+                                            onChange={(e) => setSeriesNumber(e.target.value)}
+                                            className="text-sm rounded-md border px-3 py-2"
+                                        />
+                                    </div>
+                                    <div className="flex flex-col gap-1 flex-1">
+                                        <label className="text-sm font-medium text-muted-foreground">
+                                            {t('episode_number')}
+                                        </label>
+                                        <input
+                                            type="number"
+                                            value={episodeNumber}
+                                            onChange={(e) => setEpisodeNumber(e.target.value)}
+                                            className="text-sm rounded-md border px-3 py-2"
+                                        />
+                                    </div>
+                                </div>
                             )}
                             <div className="flex gap-4">
                                 <div className="flex flex-col gap-1 flex-1">
-                                    <label className="text-sm font-medium text-muted-foreground">{t('community_rating')}</label>
+                                    <label className="text-sm font-medium text-muted-foreground">
+                                        {t('community_rating')}
+                                    </label>
                                     <input
                                         type="number"
                                         value={communityRating}
@@ -291,18 +328,24 @@ const EditItemMetadataButton = ({
                                     />
                                 </div>
                                 <div className="flex flex-col gap-1 flex-1">
-                                    <label className="text-sm font-medium text-muted-foreground">{t('critics_rating')}</label>
+                                    <label className="text-sm font-medium text-muted-foreground">
+                                        {t('critics_rating')}
+                                    </label>
                                     <input
                                         type="number"
                                         value={criticsRating}
                                         onChange={(e) => setCriticsRating(e.target.value)}
-                                        min={0} max={10} step={0.1}
+                                        min={0}
+                                        max={10}
+                                        step={0.1}
                                         className="text-sm rounded-md border px-3 py-2"
                                     />
                                 </div>
                             </div>
                             <div className="flex flex-col gap-1">
-                                <label className="text-sm font-medium text-muted-foreground">{t('tagline')}</label>
+                                <label className="text-sm font-medium text-muted-foreground">
+                                    {t('tagline')}
+                                </label>
                                 <input
                                     type="text"
                                     value={tagline}
@@ -311,7 +354,9 @@ const EditItemMetadataButton = ({
                                 />
                             </div>
                             <div className="flex flex-col gap-1">
-                                <label className="text-sm font-medium text-muted-foreground">{t('overview')}</label>
+                                <label className="text-sm font-medium text-muted-foreground">
+                                    {t('overview')}
+                                </label>
                                 <input
                                     type="text"
                                     value={overview}
@@ -320,7 +365,9 @@ const EditItemMetadataButton = ({
                                 />
                             </div>
                             <div className="flex flex-col gap-1">
-                                <label className="text-sm font-medium text-muted-foreground">{t('release_date')}</label>
+                                <label className="text-sm font-medium text-muted-foreground">
+                                    {t('release_date')}
+                                </label>
                                 <input
                                     type="date"
                                     value={releaseDate}
@@ -329,7 +376,9 @@ const EditItemMetadataButton = ({
                                 />
                             </div>
                             <div className="flex flex-col gap-1">
-                                <label className="text-sm font-medium text-muted-foreground">{t('release_year')}</label>
+                                <label className="text-sm font-medium text-muted-foreground">
+                                    {t('release_year')}
+                                </label>
                                 <input
                                     type="number"
                                     value={year}
@@ -339,37 +388,56 @@ const EditItemMetadataButton = ({
                             </div>
                             <div className="grid grid-cols-2 gap-4">
                                 <div className="flex flex-col gap-1 flex-1">
-                                    <label className="text-sm font-medium text-muted-foreground">{t('parental_rating')}</label>
-                                    <Select value={parentalRating} onValueChange={setParentalRating}>
+                                    <label className="text-sm font-medium text-muted-foreground">
+                                        {t('parental_rating')}
+                                    </label>
+                                    <Select
+                                        value={parentalRating}
+                                        onValueChange={setParentalRating}
+                                    >
                                         <SelectTrigger className="w-full">
                                             <SelectValue />
                                         </SelectTrigger>
                                         <SelectContent>
-                                            {metadataEditorInfo?.ParentalRatingOptions?.map((rating, index) => (
-                                                <SelectItem key={index} value={rating.Name ?? 'unrated'}>
-                                                    {rating.Name}
-                                                </SelectItem>
-                                            ))}
+                                            {metadataEditorInfo?.ParentalRatingOptions?.map(
+                                                (rating, index) => (
+                                                    <SelectItem
+                                                        key={index}
+                                                        value={rating.Name ?? 'unrated'}
+                                                    >
+                                                        {rating.Name}
+                                                    </SelectItem>
+                                                )
+                                            )}
                                         </SelectContent>
                                     </Select>
                                 </div>
                                 <div className="flex flex-col gap-1 flex-1">
-                                    <label className="text-sm font-medium text-muted-foreground">{t('custom_rating')}</label>
+                                    <label className="text-sm font-medium text-muted-foreground">
+                                        {t('custom_rating')}
+                                    </label>
                                     <Select value={customRating} onValueChange={setCustomRating}>
                                         <SelectTrigger className="w-full">
                                             <SelectValue />
                                         </SelectTrigger>
                                         <SelectContent>
-                                            {metadataEditorInfo?.ParentalRatingOptions?.map((rating, index) => (
-                                                <SelectItem key={index} value={rating.Name ?? 'unrated'}>
-                                                    {rating.Name}
-                                                </SelectItem>
-                                            ))}
+                                            {metadataEditorInfo?.ParentalRatingOptions?.map(
+                                                (rating, index) => (
+                                                    <SelectItem
+                                                        key={index}
+                                                        value={rating.Name ?? 'unrated'}
+                                                    >
+                                                        {rating.Name}
+                                                    </SelectItem>
+                                                )
+                                            )}
                                         </SelectContent>
                                     </Select>
                                 </div>
                                 <div className="flex flex-col gap-1 flex-1">
-                                    <label className="text-sm font-medium text-muted-foreground">{t('original_aspect_ratio')}</label>
+                                    <label className="text-sm font-medium text-muted-foreground">
+                                        {t('original_aspect_ratio')}
+                                    </label>
                                     <input
                                         type="text"
                                         value={originalAspectRatio}
@@ -378,36 +446,50 @@ const EditItemMetadataButton = ({
                                     />
                                 </div>
                                 <div className="flex flex-col gap-1 flex-1">
-                                    <label className="text-sm font-medium text-muted-foreground">{t('threed_format')}</label>
-                                    <Select value={threedFormat} onValueChange={setThreedFormat}>
-                                      <SelectTrigger className="w-full">
-                                          <SelectValue />
-                                      </SelectTrigger>
-                                      <SelectContent>
-                                        <SelectItem value={'None'}>None</SelectItem>
-                                        <SelectItem value={'HalfSideBySide'}>HSBS</SelectItem>
-                                        <SelectItem value={'FullSideBySide'}>FSBS</SelectItem>
-                                        <SelectItem value={'HalfTopAndBottom'}>HTAB</SelectItem>
-                                        <SelectItem value={'FullTopAndBottom'}>FTAB</SelectItem>
-                                        <SelectItem value={'MVC'}>MVC</SelectItem>
-                                      </SelectContent>
-                                  </Select>
+                                    <label className="text-sm font-medium text-muted-foreground">
+                                        {t('threed_format')}
+                                    </label>
+                                    <Select
+                                        value={threedFormat}
+                                        onValueChange={(value) =>
+                                            setThreedFormat(value as Video3DFormat | 'None' | '')
+                                        }
+                                    >
+                                        <SelectTrigger className="w-full">
+                                            <SelectValue />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            <SelectItem value={'None'}>None</SelectItem>
+                                            <SelectItem value={'HalfSideBySide'}>HSBS</SelectItem>
+                                            <SelectItem value={'FullSideBySide'}>FSBS</SelectItem>
+                                            <SelectItem value={'HalfTopAndBottom'}>HTAB</SelectItem>
+                                            <SelectItem value={'FullTopAndBottom'}>FTAB</SelectItem>
+                                            <SelectItem value={'MVC'}>MVC</SelectItem>
+                                        </SelectContent>
+                                    </Select>
                                 </div>
                             </div>
                         </div>
                     )}
                     {metadataType === 'ExternalIds' && (
                         <div className="flex flex-col gap-4">
-                          {!metadataEditorInfo && (
-                              <p className="text-sm text-muted-foreground">{t('loading')}</p>
-                          )}
+                            {!metadataEditorInfo && (
+                                <p className="text-sm text-muted-foreground">{t('loading')}</p>
+                            )}
                             {metadataEditorInfo?.ExternalIdInfos?.map((info) => (
                                 <div key={info.Key} className="flex flex-col gap-1">
-                                    <label className="text-sm font-medium text-muted-foreground">{info.Name}</label>
+                                    <label className="text-sm font-medium text-muted-foreground">
+                                        {info.Name}
+                                    </label>
                                     <input
                                         type="text"
                                         value={providerIds[info.Key ?? ''] ?? ''}
-                                        onChange={(e) => setProviderIds({...providerIds, [info.Key ?? '']: e.target.value})}
+                                        onChange={(e) =>
+                                            setProviderIds({
+                                                ...providerIds,
+                                                [info.Key ?? '']: e.target.value,
+                                            })
+                                        }
                                         className="text-sm rounded-md border px-3 py-2"
                                     />
                                 </div>
@@ -417,10 +499,15 @@ const EditItemMetadataButton = ({
                     {metadataType === 'People' && (
                         <div className="flex flex-col gap-2">
                             {fullItem?.People?.map((person, index) => (
-                                <div key={index} className="flex items-center justify-between rounded-md border px-3 py-2">
+                                <div
+                                    key={index}
+                                    className="flex items-center justify-between rounded-md border px-3 py-2"
+                                >
                                     <div className="flex flex-col">
                                         <span className="text-sm font-medium">{person.Name}</span>
-                                        <span className="text-xs text-muted-foreground">{person.Type} {person.Role ? `— ${person.Role}` : ''}</span>
+                                        <span className="text-xs text-muted-foreground">
+                                            {person.Type} {person.Role ? `— ${person.Role}` : ''}
+                                        </span>
                                     </div>
                                 </div>
                             ))}
@@ -441,9 +528,16 @@ const EditItemMetadataButton = ({
                             </div>
                             <div className="flex flex-col gap-2">
                                 {tags.map((tag, index) => (
-                                    <div key={index} className="flex items-center justify-between rounded-md border px-3 py-2">
+                                    <div
+                                        key={index}
+                                        className="flex items-center justify-between rounded-md border px-3 py-2"
+                                    >
                                         <span className="text-sm">{tag}</span>
-                                        <Button variant="ghost" size="icon" onClick={() => removeTag(index)}>
+                                        <Button
+                                            variant="ghost"
+                                            size="icon"
+                                            onClick={() => removeTag(index)}
+                                        >
                                             <Trash2 className="h-4 w-4" />
                                         </Button>
                                     </div>
@@ -452,29 +546,36 @@ const EditItemMetadataButton = ({
                         </div>
                     )}
                     {metadataType === 'Studios' && (
-                      <div className="flex flex-col gap-4">
-                          <div className="flex gap-2">
-                              <input
-                                  type="text"
-                                  value={studioInput}
-                                  onChange={(e) => setStudioInput(e.target.value)}
-                                  onKeyDown={(e) => e.key === 'Enter' && addStudio()}
-                                  placeholder={t('add_studio')}
-                                  className="text-sm rounded-md border px-3 py-2 flex-1"
-                              />
-                              <Button onClick={addStudio}>{t('add')}</Button>
-                          </div>
-                          <div className="flex flex-col gap-2">
-                              {studio.map((studio, index) => (
-                                  <div key={index} className="flex items-center justify-between rounded-md border px-3 py-2">
-                                      <span className="text-sm">{studio}</span>
-                                      <Button variant="ghost" size="icon" onClick={() => removeStudio(index)}>
-                                          <Trash2 className="h-4 w-4" />
-                                      </Button>
-                                  </div>
-                              ))}
-                          </div>
-                      </div>
+                        <div className="flex flex-col gap-4">
+                            <div className="flex gap-2">
+                                <input
+                                    type="text"
+                                    value={studioInput}
+                                    onChange={(e) => setStudioInput(e.target.value)}
+                                    onKeyDown={(e) => e.key === 'Enter' && addStudio()}
+                                    placeholder={t('add_studio')}
+                                    className="text-sm rounded-md border px-3 py-2 flex-1"
+                                />
+                                <Button onClick={addStudio}>{t('add')}</Button>
+                            </div>
+                            <div className="flex flex-col gap-2">
+                                {studio.map((studio, index) => (
+                                    <div
+                                        key={index}
+                                        className="flex items-center justify-between rounded-md border px-3 py-2"
+                                    >
+                                        <span className="text-sm">{studio}</span>
+                                        <Button
+                                            variant="ghost"
+                                            size="icon"
+                                            onClick={() => removeStudio(index)}
+                                        >
+                                            <Trash2 className="h-4 w-4" />
+                                        </Button>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
                     )}
                     {metadataType === 'Genres' && (
                         <div className="flex flex-col gap-4">
@@ -491,9 +592,16 @@ const EditItemMetadataButton = ({
                             </div>
                             <div className="flex flex-col gap-2">
                                 {genres.map((genre, index) => (
-                                    <div key={index} className="flex items-center justify-between rounded-md border px-3 py-2">
+                                    <div
+                                        key={index}
+                                        className="flex items-center justify-between rounded-md border px-3 py-2"
+                                    >
                                         <span className="text-sm">{genre}</span>
-                                        <Button variant="ghost" size="icon" onClick={() => removeGenre(index)}>
+                                        <Button
+                                            variant="ghost"
+                                            size="icon"
+                                            onClick={() => removeGenre(index)}
+                                        >
                                             <Trash2 className="h-4 w-4" />
                                         </Button>
                                     </div>
@@ -504,15 +612,25 @@ const EditItemMetadataButton = ({
                     {metadataType === 'MetadataSettings' && (
                         <div className="flex flex-col gap-4">
                             <div className="flex flex-col gap-1">
-                                <label className="text-sm font-medium text-muted-foreground">{t('preferred_language')}</label>
-                                <Select value={preferredLanguage} onValueChange={setPreferredLanguage}>
+                                <label className="text-sm font-medium text-muted-foreground">
+                                    {t('preferred_language')}
+                                </label>
+                                <Select
+                                    value={preferredLanguage}
+                                    onValueChange={setPreferredLanguage}
+                                >
                                     <SelectTrigger className="w-full">
                                         <SelectValue placeholder={t('inherit_default')} />
                                     </SelectTrigger>
                                     <SelectContent>
-                                        <SelectItem value={'inherit'}>{t('inherit_default')}</SelectItem>
+                                        <SelectItem value={'inherit'}>
+                                            {t('inherit_default')}
+                                        </SelectItem>
                                         {metadataEditorInfo?.Cultures?.map((culture) => (
-                                            <SelectItem key={culture.TwoLetterISOLanguageName} value={culture.TwoLetterISOLanguageName ?? ''}>
+                                            <SelectItem
+                                                key={culture.TwoLetterISOLanguageName}
+                                                value={culture.TwoLetterISOLanguageName ?? ''}
+                                            >
                                                 {culture.DisplayName}
                                             </SelectItem>
                                         ))}
@@ -520,15 +638,25 @@ const EditItemMetadataButton = ({
                                 </Select>
                             </div>
                             <div className="flex flex-col gap-1">
-                                <label className="text-sm font-medium text-muted-foreground">{t('preferred_country')}</label>
-                                <Select value={preferredCountry} onValueChange={setPreferredCountry}>
+                                <label className="text-sm font-medium text-muted-foreground">
+                                    {t('preferred_country')}
+                                </label>
+                                <Select
+                                    value={preferredCountry}
+                                    onValueChange={setPreferredCountry}
+                                >
                                     <SelectTrigger className="w-full">
                                         <SelectValue placeholder={t('inherit_default')} />
                                     </SelectTrigger>
                                     <SelectContent>
-                                        <SelectItem value={'inherit'}>{t('inherit_default')}</SelectItem>
+                                        <SelectItem value={'inherit'}>
+                                            {t('inherit_default')}
+                                        </SelectItem>
                                         {metadataEditorInfo?.Countries?.map((country) => (
-                                            <SelectItem key={country.TwoLetterISORegionName} value={country.TwoLetterISORegionName ?? ''}>
+                                            <SelectItem
+                                                key={country.TwoLetterISORegionName}
+                                                value={country.TwoLetterISORegionName ?? ''}
+                                            >
                                                 {country.DisplayName}
                                             </SelectItem>
                                         ))}
@@ -545,23 +673,41 @@ const EditItemMetadataButton = ({
                         </div>
                     )}
                     {metadataType === 'EnabledFields' && (
-                      <div className="flex flex-col gap-4">
-                              {['Name', 'Overview', 'Genres', 'ParentalRating', 'People', 'ProductionLocations', 'Studios', 'Tags'].map((field) => (
-                                  <label key={field} className="flex items-center gap-2">
-                                      <Checkbox
-                                          checked={!lockedFields.includes(field)}
-                                          onCheckedChange={(checked) => {
-                                              if (checked) {
-                                                  setLockedFields(lockedFields.filter(f => f !== field));
-                                              } else {
-                                                  setLockedFields([...lockedFields, field]);
-                                              }
-                                          }}
-                                      />
-                                      <span className="text-sm font-medium">{t(field.toLowerCase())}</span>
-                                  </label>
-                              ))}
-                          </div>
+                        <div className="flex flex-col gap-4">
+                            {[
+                                'Name',
+                                'Overview',
+                                'Genres',
+                                'ParentalRating',
+                                'People',
+                                'ProductionLocations',
+                                'Studios',
+                                'Tags',
+                            ].map((field) => (
+                                <label key={field} className="flex items-center gap-2">
+                                    <Checkbox
+                                        checked={!lockedFields.includes(field as MetadataField)}
+                                        onCheckedChange={(checked) => {
+                                            if (checked) {
+                                                setLockedFields(
+                                                    lockedFields.filter(
+                                                        (f) => f !== (field as MetadataField)
+                                                    )
+                                                );
+                                            } else {
+                                                setLockedFields([
+                                                    ...lockedFields,
+                                                    field as MetadataField,
+                                                ]);
+                                            }
+                                        }}
+                                    />
+                                    <span className="text-sm font-medium">
+                                        {t(field.toLowerCase())}
+                                    </span>
+                                </label>
+                            ))}
+                        </div>
                     )}
                 </div>
                 <DialogFooter>
