@@ -2,15 +2,13 @@ import type { BaseItemDto } from '@jellyfin/sdk/lib/generated-client/models';
 import BaseMediaPage from './BaseMediaPage';
 import DescriptionItem from './DescriptionItem';
 import { getPrimaryImageUrl } from '@/utils/jellyfinUrls';
-import { ImageOff, Play } from 'lucide-react';
+import { ImageOff } from 'lucide-react';
 import PeopleRow from './PeopleRow';
-import { Button } from '@/components/ui/button';
 import { useTranslation } from 'react-i18next';
 import { Skeleton } from '@/components/ui/skeleton';
 import MoreLikeThisRow from './MoreLikeThisRow';
 import type { AppConfig } from '@/hooks/api/useConfig';
 import DetailBadges from './DetailBadges';
-import { Link } from 'react-router';
 import MediaInfoDialog from '../../components/MediaInfoDialog';
 import FavoriteButton from '../../components/FavoriteButton';
 import WatchListButton from '../../components/WatchlistButton';
@@ -20,6 +18,7 @@ import ItemAdminButton from '@/components/ItemAdminButton';
 import { useState } from 'react';
 import { TrailerButton } from '../../components/TrailerButton';
 import ItemDownloadButton from '../../components/ItemDownloadButton';
+import SourcePickerButton from '@/components/SourcePickerButton';
 
 interface MoviePageProps {
     item: BaseItemDto;
@@ -71,12 +70,13 @@ const MoviePage = ({ item, config }: MoviePageProps) => {
                     <h2 className="text-4xl sm:text-5xl font-bold mt-2">{item.Name}</h2>
                     <DetailBadges item={item} appConfig={config} />
                     <div className="mt-1 flex items-center gap-2">
-                        <Button className="w-min" asChild>
-                            <Link to={`/play/${item.Id}`}>
-                                <Play />
-                                {isCurrentlyPlaying ? t('resume') : t('play')}
-                            </Link>
-                        </Button>
+                        <SourcePickerButton
+                            itemId={item.Id || ''}
+                            mediaSources={item.MediaSources}
+                            isCurrentlyPlaying={Boolean(isCurrentlyPlaying)}
+                            playLabel={t('play')}
+                            resumeLabel={t('resume')}
+                        />
                         <TrailerButton item={item} />
                         <FavoriteButton
                             item={item}

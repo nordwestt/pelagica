@@ -1,8 +1,7 @@
 import type { AppConfig } from '@/hooks/api/useConfig';
 import type { BaseItemDto } from '@jellyfin/sdk/lib/generated-client/models';
 import BaseMediaPage from './BaseMediaPage';
-import { Button } from '@/components/ui/button';
-import { Dot, ImageOff, Play } from 'lucide-react';
+import { Dot, ImageOff } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { getPrimaryImageUrl, getThumbUrl } from '@/utils/jellyfinUrls';
 import DetailBadges from './DetailBadges';
@@ -17,7 +16,6 @@ import {
     SelectValue,
 } from '@/components/ui/select';
 import PeopleRow from './PeopleRow';
-import { Link } from 'react-router';
 import JellyfinItemKindIcon from '@/components/JellyfinItemKindIcon';
 import MediaInfoDialog from '../../components/MediaInfoDialog';
 import FavoriteButton from '../../components/FavoriteButton';
@@ -25,6 +23,8 @@ import { getUserId } from '@/utils/localstorageCredentials';
 import PlayStateButton from '../../components/PlayStateButton';
 import ItemAdminButton from '@/components/ItemAdminButton';
 import ItemDownloadButton from '../../components/ItemDownloadButton';
+import SourcePickerButton from '@/components/SourcePickerButton';
+import { Link } from 'react-router';
 
 interface EpisodePageProps {
     item: BaseItemDto;
@@ -48,6 +48,7 @@ const EpisodePage = ({ item, config }: EpisodePageProps) => {
     const watched = item.UserData?.PlaybackPositionTicks ?? 0;
     const runtime = item.RunTimeTicks ?? 0;
     const progress = runtime > 0 ? (watched / runtime) * 100 : 0;
+    const isCurrentlyPlaying = watched > 0 && runtime > 0 && watched < runtime;
 
     return (
         <BaseMediaPage itemId={item.SeriesId || ''} name={item.SeriesName || item.Name || ''}>
@@ -116,12 +117,13 @@ const EpisodePage = ({ item, config }: EpisodePageProps) => {
                     <h2 className="text-4xl sm:text-5xl font-bold -mt-2">{item.Name}</h2>
                     <DetailBadges item={item} appConfig={config} />
                     <div className="mt-1 flex items-center gap-2">
-                        <Button className="w-fit" asChild>
-                            <Link to={`/play/${item.Id}`}>
-                                <Play />
-                                {t(progress > 0 && progress < 100 ? 'resume' : 'play')}
-                            </Link>
-                        </Button>
+                        <SourcePickerButton
+                            itemId={item.Id || ''}
+                            mediaSources={item.MediaSources}
+                            isCurrentlyPlaying={isCurrentlyPlaying}
+                            playLabel={t('play')}
+                            resumeLabel={t('resume')}
+                        />
                         <FavoriteButton
                             item={item}
                             showFavoriteButton={
