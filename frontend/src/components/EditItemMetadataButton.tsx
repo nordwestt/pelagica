@@ -23,6 +23,8 @@ import {
 import { Button } from './ui/button';
 import { Checkbox } from './ui/checkbox';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
+import { Input } from './ui/input';
+import { Label } from './ui/label';
 
 type MetadataType =
     | 'Basic'
@@ -207,7 +209,7 @@ const EditItemMetadataButton = ({
                 </DialogHeader>
                 <div className="flex-1 overflow-y-auto space-y-8">
                     <div className="flex flex-col gap-1">
-                        <label className="text-sm font-medium">{t('metadata_type')}</label>
+                        <Label className="text-sm font-medium">{t('metadata_type')}</Label>
                         <Select
                             value={metadataType}
                             onValueChange={(value) => setMetadataType(value as MetadataType)}
@@ -234,10 +236,10 @@ const EditItemMetadataButton = ({
                     {metadataType === 'Basic' && (
                         <div className="flex flex-col gap-4">
                             <div className="flex flex-col gap-1">
-                                <label className="text-sm font-medium text-muted-foreground">
+                                <Label className="text-sm font-medium text-muted-foreground">
                                     {t('path')}
-                                </label>
-                                <input
+                                </Label>
+                                <Input
                                     type="text"
                                     value={path}
                                     disabled
@@ -246,10 +248,10 @@ const EditItemMetadataButton = ({
                             </div>
 
                             <div className="flex flex-col gap-1">
-                                <label className="text-sm font-medium text-muted-foreground">
+                                <Label className="text-sm font-medium text-muted-foreground">
                                     {t('title')}
-                                </label>
-                                <input
+                                </Label>
+                                <Input
                                     type="text"
                                     value={title}
                                     onChange={(e) => setTitle(e.target.value)}
@@ -257,10 +259,10 @@ const EditItemMetadataButton = ({
                                 />
                             </div>
                             <div className="flex flex-col gap-1">
-                                <label className="text-sm font-medium text-muted-foreground">
+                                <Label className="text-sm font-medium text-muted-foreground">
                                     {t('original_title')}
-                                </label>
-                                <input
+                                </Label>
+                                <Input
                                     type="text"
                                     value={originalTitle}
                                     onChange={(e) => setOriginalTitle(e.target.value)}
@@ -268,10 +270,10 @@ const EditItemMetadataButton = ({
                                 />
                             </div>
                             <div className="flex flex-col gap-1">
-                                <label className="text-sm font-medium text-muted-foreground">
+                                <Label className="text-sm font-medium text-muted-foreground">
                                     {t('sort_title')}
-                                </label>
-                                <input
+                                </Label>
+                                <Input
                                     type="text"
                                     value={sortTitle}
                                     onChange={(e) => setSortTitle(e.target.value)}
@@ -279,10 +281,10 @@ const EditItemMetadataButton = ({
                                 />
                             </div>
                             <div className="flex flex-col gap-1">
-                                <label className="text-sm font-medium text-muted-foreground">
+                                <Label className="text-sm font-medium text-muted-foreground">
                                     {t('date_added')}
-                                </label>
-                                <input
+                                </Label>
+                                <Input
                                     type="date"
                                     value={dateAdded}
                                     onChange={(e) => setDateAdded(e.target.value)}
@@ -292,10 +294,10 @@ const EditItemMetadataButton = ({
                             {fullItem?.Type === 'Episode' && (
                                 <div className="flex gap-4">
                                     <div className="flex flex-col gap-1 flex-1">
-                                        <label className="text-sm font-medium text-muted-foreground">
+                                        <Label className="text-sm font-medium text-muted-foreground">
                                             {t('series_number')}
-                                        </label>
-                                        <input
+                                        </Label>
+                                        <Input
                                             type="number"
                                             value={seriesNumber}
                                             onChange={(e) => setSeriesNumber(e.target.value)}
@@ -303,10 +305,10 @@ const EditItemMetadataButton = ({
                                         />
                                     </div>
                                     <div className="flex flex-col gap-1 flex-1">
-                                        <label className="text-sm font-medium text-muted-foreground">
+                                        <Label className="text-sm font-medium text-muted-foreground">
                                             {t('episode_number')}
-                                        </label>
-                                        <input
+                                        </Label>
+                                        <Input
                                             type="number"
                                             value={episodeNumber}
                                             onChange={(e) => setEpisodeNumber(e.target.value)}
@@ -317,10 +319,10 @@ const EditItemMetadataButton = ({
                             )}
                             <div className="flex gap-4">
                                 <div className="flex flex-col gap-1 flex-1">
-                                    <label className="text-sm font-medium text-muted-foreground">
+                                    <Label className="text-sm font-medium text-muted-foreground">
                                         {t('community_rating')}
-                                    </label>
-                                    <input
+                                    </Label>
+                                    <Input
                                         type="number"
                                         value={communityRating}
                                         onChange={(e) => setCommunityRating(e.target.value)}
@@ -328,10 +330,10 @@ const EditItemMetadataButton = ({
                                     />
                                 </div>
                                 <div className="flex flex-col gap-1 flex-1">
-                                    <label className="text-sm font-medium text-muted-foreground">
+                                    <Label className="text-sm font-medium text-muted-foreground">
                                         {t('critics_rating')}
-                                    </label>
-                                    <input
+                                    </Label>
+                                    <Input
                                         type="number"
                                         value={criticsRating}
                                         onChange={(e) => setCriticsRating(e.target.value)}
@@ -343,10 +345,10 @@ const EditItemMetadataButton = ({
                                 </div>
                             </div>
                             <div className="flex flex-col gap-1">
-                                <label className="text-sm font-medium text-muted-foreground">
+                                <Label className="text-sm font-medium text-muted-foreground">
                                     {t('tagline')}
-                                </label>
-                                <input
+                                </Label>
+                                <Input
                                     type="text"
                                     value={tagline}
                                     onChange={(e) => setTagline(e.target.value)}
@@ -354,10 +356,10 @@ const EditItemMetadataButton = ({
                                 />
                             </div>
                             <div className="flex flex-col gap-1">
-                                <label className="text-sm font-medium text-muted-foreground">
+                                <Label className="text-sm font-medium text-muted-foreground">
                                     {t('overview')}
-                                </label>
-                                <input
+                                </Label>
+                                <Input
                                     type="text"
                                     value={overview}
                                     onChange={(e) => setOverview(e.target.value)}
@@ -365,10 +367,10 @@ const EditItemMetadataButton = ({
                                 />
                             </div>
                             <div className="flex flex-col gap-1">
-                                <label className="text-sm font-medium text-muted-foreground">
+                                <Label className="text-sm font-medium text-muted-foreground">
                                     {t('release_date')}
-                                </label>
-                                <input
+                                </Label>
+                                <Input
                                     type="date"
                                     value={releaseDate}
                                     onChange={(e) => setReleaseDate(e.target.value)}
@@ -376,10 +378,10 @@ const EditItemMetadataButton = ({
                                 />
                             </div>
                             <div className="flex flex-col gap-1">
-                                <label className="text-sm font-medium text-muted-foreground">
+                                <Label className="text-sm font-medium text-muted-foreground">
                                     {t('release_year')}
-                                </label>
-                                <input
+                                </Label>
+                                <Input
                                     type="number"
                                     value={year}
                                     onChange={(e) => setYear(e.target.value)}
@@ -388,9 +390,9 @@ const EditItemMetadataButton = ({
                             </div>
                             <div className="grid grid-cols-2 gap-4">
                                 <div className="flex flex-col gap-1 flex-1">
-                                    <label className="text-sm font-medium text-muted-foreground">
+                                    <Label className="text-sm font-medium text-muted-foreground">
                                         {t('parental_rating')}
-                                    </label>
+                                    </Label>
                                     <Select
                                         value={parentalRating}
                                         onValueChange={setParentalRating}
@@ -413,9 +415,9 @@ const EditItemMetadataButton = ({
                                     </Select>
                                 </div>
                                 <div className="flex flex-col gap-1 flex-1">
-                                    <label className="text-sm font-medium text-muted-foreground">
+                                    <Label className="text-sm font-medium text-muted-foreground">
                                         {t('custom_rating')}
-                                    </label>
+                                    </Label>
                                     <Select value={customRating} onValueChange={setCustomRating}>
                                         <SelectTrigger className="w-full">
                                             <SelectValue />
@@ -435,10 +437,10 @@ const EditItemMetadataButton = ({
                                     </Select>
                                 </div>
                                 <div className="flex flex-col gap-1 flex-1">
-                                    <label className="text-sm font-medium text-muted-foreground">
+                                    <Label className="text-sm font-medium text-muted-foreground">
                                         {t('original_aspect_ratio')}
-                                    </label>
-                                    <input
+                                    </Label>
+                                    <Input
                                         type="text"
                                         value={originalAspectRatio}
                                         onChange={(e) => setOriginalAspectRatio(e.target.value)}
@@ -446,9 +448,9 @@ const EditItemMetadataButton = ({
                                     />
                                 </div>
                                 <div className="flex flex-col gap-1 flex-1">
-                                    <label className="text-sm font-medium text-muted-foreground">
+                                    <Label className="text-sm font-medium text-muted-foreground">
                                         {t('threed_format')}
-                                    </label>
+                                    </Label>
                                     <Select
                                         value={threedFormat}
                                         onValueChange={(value) =>
@@ -478,10 +480,10 @@ const EditItemMetadataButton = ({
                             )}
                             {metadataEditorInfo?.ExternalIdInfos?.map((info) => (
                                 <div key={info.Key} className="flex flex-col gap-1">
-                                    <label className="text-sm font-medium text-muted-foreground">
+                                    <Label className="text-sm font-medium text-muted-foreground">
                                         {info.Name}
-                                    </label>
-                                    <input
+                                    </Label>
+                                    <Input
                                         type="text"
                                         value={providerIds[info.Key ?? ''] ?? ''}
                                         onChange={(e) =>
@@ -516,7 +518,7 @@ const EditItemMetadataButton = ({
                     {metadataType === 'Tags' && (
                         <div className="flex flex-col gap-4">
                             <div className="flex gap-2">
-                                <input
+                                <Input
                                     type="text"
                                     value={tagInput}
                                     onChange={(e) => setTagInput(e.target.value)}
@@ -548,7 +550,7 @@ const EditItemMetadataButton = ({
                     {metadataType === 'Studios' && (
                         <div className="flex flex-col gap-4">
                             <div className="flex gap-2">
-                                <input
+                                <Input
                                     type="text"
                                     value={studioInput}
                                     onChange={(e) => setStudioInput(e.target.value)}
@@ -580,7 +582,7 @@ const EditItemMetadataButton = ({
                     {metadataType === 'Genres' && (
                         <div className="flex flex-col gap-4">
                             <div className="flex gap-2">
-                                <input
+                                <Input
                                     type="text"
                                     value={genreInput}
                                     onChange={(e) => setGenreInput(e.target.value)}
@@ -612,9 +614,9 @@ const EditItemMetadataButton = ({
                     {metadataType === 'MetadataSettings' && (
                         <div className="flex flex-col gap-4">
                             <div className="flex flex-col gap-1">
-                                <label className="text-sm font-medium text-muted-foreground">
+                                <Label className="text-sm font-medium text-muted-foreground">
                                     {t('preferred_language')}
-                                </label>
+                                </Label>
                                 <Select
                                     value={preferredLanguage}
                                     onValueChange={setPreferredLanguage}
@@ -638,9 +640,9 @@ const EditItemMetadataButton = ({
                                 </Select>
                             </div>
                             <div className="flex flex-col gap-1">
-                                <label className="text-sm font-medium text-muted-foreground">
+                                <Label className="text-sm font-medium text-muted-foreground">
                                     {t('preferred_country')}
-                                </label>
+                                </Label>
                                 <Select
                                     value={preferredCountry}
                                     onValueChange={setPreferredCountry}
@@ -663,13 +665,13 @@ const EditItemMetadataButton = ({
                                     </SelectContent>
                                 </Select>
                             </div>
-                            <label className="flex items-center gap-2">
+                            <Label className="flex items-center gap-2">
                                 <Checkbox
                                     checked={lockData}
                                     onCheckedChange={(checked) => setLockData(!!checked)}
                                 />
                                 <span className="text-sm font-medium">{t('lock_data')}</span>
-                            </label>
+                            </Label>
                         </div>
                     )}
                     {metadataType === 'EnabledFields' && (
@@ -684,7 +686,7 @@ const EditItemMetadataButton = ({
                                 'Studios',
                                 'Tags',
                             ].map((field) => (
-                                <label key={field} className="flex items-center gap-2">
+                                <Label key={field} className="flex items-center gap-2">
                                     <Checkbox
                                         checked={!lockedFields.includes(field as MetadataField)}
                                         onCheckedChange={(checked) => {
@@ -705,7 +707,7 @@ const EditItemMetadataButton = ({
                                     <span className="text-sm font-medium">
                                         {t(field.toLowerCase())}
                                     </span>
-                                </label>
+                                </Label>
                             ))}
                         </div>
                     )}
