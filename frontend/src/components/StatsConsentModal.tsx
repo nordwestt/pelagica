@@ -10,8 +10,10 @@ import {
     DialogHeader,
     DialogTitle,
 } from './ui/dialog';
+import { Trans, useTranslation } from 'react-i18next';
 
 const StatsConsentModal = () => {
+    const { t } = useTranslation('common');
     const { data: statsConsent } = useStatsConsent();
     const setStatsConsent = useSetStatsConsent();
 
@@ -31,20 +33,21 @@ const StatsConsentModal = () => {
                 showCloseButton={false}
             >
                 <DialogHeader>
-                    <DialogTitle>Help us count</DialogTitle>
+                    <DialogTitle>{t('stats_consent_title')}</DialogTitle>
                     <DialogDescription>
-                        We have no way to know how many people use Pelagica unless you tell us.
-                        Opting in sends a daily ping with your version and a random ID. That's it.
-                        The results are public at{' '}
-                        <a
-                            href="https://stats.pelagica.app"
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="underline"
-                        >
-                            stats.pelagica.app
-                        </a>
-                        .
+                        <Trans
+                            i18nKey="stats_consent_message"
+                            components={{
+                                anchor: (
+                                    <a
+                                        href="https://stats.pelagica.app"
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="underline"
+                                    />
+                                ),
+                            }}
+                        />
                     </DialogDescription>
                 </DialogHeader>
                 <DialogFooter className="gap-2">
@@ -53,14 +56,14 @@ const StatsConsentModal = () => {
                         onClick={() => handleConsent(false)}
                         disabled={setStatsConsent.isPending}
                     >
-                        No thanks
+                        {t('stats_consent_reject')}
                     </Button>
                     <Button
                         onClick={() => handleConsent(true)}
                         disabled={setStatsConsent.isPending}
                     >
                         <CircleCheck />
-                        {setStatsConsent.isPending ? 'Saving…' : 'Accept'}
+                        {t('stats_consent_accept')}
                     </Button>
                 </DialogFooter>
             </DialogContent>
