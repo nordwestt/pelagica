@@ -12,6 +12,8 @@ export function getItemTypeLabel(type?: string | null): string {
             return 'Playlist';
         case 'Genre':
             return 'Genre';
+        case 'MusicGenre':
+            return 'Genre';
         case 'Series':
             return 'Series';
         case 'Movie':
@@ -27,7 +29,7 @@ export function getItemSubtitle(item: BaseItemDto): string {
     if (item.Type === 'MusicAlbum' && item.AlbumArtist) {
         return item.AlbumArtist;
     }
-    if (item.Type === 'Genre') {
+    if (item.Type === 'Genre' || item.Type === 'MusicGenre') {
         if (item.ChildCount != null) {
             if (item.ChildCount === 0) return 'No items';
             return item.ChildCount === 1 ? '1 item' : `${item.ChildCount} items`;
@@ -57,7 +59,8 @@ export function getSidebarPosterUrl(item: BaseItemDto): string {
         (item.Type === 'MusicAlbum' ||
             item.Type === 'MusicArtist' ||
             item.Type === 'Playlist' ||
-            item.Type === 'Genre');
+            item.Type === 'Genre' ||
+            item.Type === 'MusicGenre');
     return getPrimaryImageUrl(
         imageItemId,
         isSquare ? { height: 112, width: 112 } : { height: 168, width: 112 },

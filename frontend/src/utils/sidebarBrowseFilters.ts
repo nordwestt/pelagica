@@ -83,7 +83,7 @@ export function getItemTypesForBrowseFilter(
 export function getGenresIncludeItemTypes(category: BrowserMediaCategory): BaseItemKind[] {
     switch (category) {
         case 'music':
-            return ['MusicAlbum', 'Audio'];
+            return ['MusicAlbum'];
         case 'series':
             return ['Series'];
         case 'movie':
@@ -105,6 +105,7 @@ export function parseGenreMediaCategory(
 
 /** Item types shown when opening a genre from the sidebar (or genre page with ?media=). */
 export function getGenreDetailIncludeTypes(category: BrowserMediaCategory): BaseItemKind[] {
+    if (category === 'music') return ['MusicAlbum'];
     return getGenresIncludeItemTypes(category);
 }
 

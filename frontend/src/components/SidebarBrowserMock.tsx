@@ -139,7 +139,7 @@ export function SidebarBrowserMock({ className }: SidebarBrowserMockProps) {
 
     const handleSelectItem = (item: BaseItemDto) => {
         if (!item.Id) return;
-        if (showingGenres || item.Type === 'Genre') {
+        if (showingGenres || item.Type === 'Genre' || item.Type === 'MusicGenre') {
             navigate(buildGenreItemUrl(item.Id, activeCategory, activeLibraryId));
             return;
         }
