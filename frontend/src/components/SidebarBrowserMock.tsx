@@ -87,20 +87,30 @@ export function SidebarBrowserMock({ className }: SidebarBrowserMockProps) {
     const items = useMemo(() => data?.pages.flatMap((page) => page.items) ?? [], [data?.pages]);
     const totalCount = data?.pages[0]?.totalCount ?? 0;
 
-    const navigateToLibraryForCategory = (nextCategory: BrowserMediaCategory | 'all') => {
+    const goToLibraryForCategory = (
+        nextCategory: BrowserMediaCategory,
+        { clearSearch = false }: { clearSearch?: boolean } = {}
+    ) => {
+        setCategory(nextCategory);
+        if (clearSearch) setSearchQuery('');
+
         const libraryId = findLibraryIdForCategory(views?.Items, nextCategory);
         if (!libraryId) return;
+
         navigate(`/library?${buildLibrarySearchParams(libraryId).toString()}`);
     };
 
+    const activeTab = toTabCategory(category);
+
     const handleCategoryChange = (value: string) => {
-        const nextCategory = value as BrowserMediaCategory;
-        setCategory(nextCategory);
-        setSearchQuery('');
-        navigateToLibraryForCategory(nextCategory);
+        goToLibraryForCategory(value as BrowserMediaCategory, { clearSearch: true });
     };
 
-    const activeTab = toTabCategory(category);
+    const handleActiveTabClick = (tabCategory: BrowserMediaCategory) => {
+        if (activeTab !== tabCategory) return;
+        // Re-clicking the active tab returns to the library grid on the right.
+        goToLibraryForCategory(tabCategory);
+    };
 
     const handleSelectItem = (itemId: string) => {
         navigate(`/item/${itemId}`);
@@ -144,6 +154,7 @@ export function SidebarBrowserMock({ className }: SidebarBrowserMockProps) {
                             key={tab.value}
                             value={tab.value}
                             className="flex-1 gap-1 px-1 text-xs sm:px-2"
+                            onClick={() => handleActiveTabClick(tab.value)}
                         >
                             {tab.icon}
                             <span className="truncate">{tab.label}</span>
