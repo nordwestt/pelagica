@@ -27,10 +27,12 @@ import {
     getLibraryCollapsibleState,
     saveLibraryCollapsibleState,
 } from '../utils/localstorageSidebar';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+import { useSidebar } from '@/components/ui/sidebar';
 import { Button } from './ui/button';
 import { SUPPORTED_LIBRARY_COLLECTION_TYPES } from '../utils/supportedLibraryCollectionTypes';
 import { DynamicIcon, type IconName } from 'lucide-react/dynamic';
+import { SidebarBrowserMock } from '@/components/SidebarBrowserMock';
 
 function serverUrlToDomain(url: string) {
     try {
@@ -73,7 +75,13 @@ export const LinkSidebarItem = ({
 };
 
 const AppSidebar = () => {
+    const { setOpen, isMobile } = useSidebar();
     const { t } = useTranslation('sidebar');
+
+    // Mock: keep sidebar expanded on desktop so browse UI stays visible (hidden in icon mode).
+    useEffect(() => {
+        if (!isMobile) setOpen(true);
+    }, [isMobile, setOpen]);
     const { config } = useConfig();
     const { data: views } = useUserViews();
     const serverUrl = getServerUrl();
@@ -94,7 +102,7 @@ const AppSidebar = () => {
     const validLinks = config?.links?.filter((link) => link.url && link.text) ?? [];
 
     return (
-        <Sidebar variant="floating" collapsible="icon">
+        <Sidebar variant="sidebar" collapsible="icon">
             <SidebarHeader>
                 <SidebarMenu>
                     <SidebarMenuButton
@@ -118,9 +126,10 @@ const AppSidebar = () => {
                     </SidebarMenuButton>
                 </SidebarMenu>
             </SidebarHeader>
-            <SidebarContent>
-                <SidebarGroup>
-                    <SidebarGroupLabel>{t('navigation')}</SidebarGroupLabel>
+            <SidebarContent className="gap-1 overflow-hidden">
+                <SidebarBrowserMock className="min-h-0 flex-1" />
+                <SidebarGroup className="shrink-0 py-1">
+                    <SidebarGroupLabel className="h-7">{t('navigation')}</SidebarGroupLabel>
                     <SidebarGroupContent>
                         <SidebarMenu>
                             <SidebarMenuItem>
