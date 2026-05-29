@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useMemo, useState } from 'react';
 import type { BaseItemDto } from '@jellyfin/sdk/lib/generated-client/models';
 import { Mic2, Play } from 'lucide-react';
 import { Link } from 'react-router';
@@ -9,9 +9,10 @@ import {
     useArtistItems,
     useArtistTracks,
 } from '@/hooks/api/useArtistItems';
+import { useImagePalette } from '@/hooks/useImagePalette';
 import { useMusicPlayback } from '@/hooks/useMusicPlayback';
-import { usePageBackground } from '@/hooks/usePageBackground';
 import { getPrimaryImageUrl } from '@/utils/jellyfinUrls';
+import { cn } from '@/lib/utils';
 import FavoriteButton from '@/components/FavoriteButton';
 import ItemAdminButton from '@/components/ItemAdminButton';
 import { Badge } from '@/components/ui/badge';
@@ -37,35 +38,18 @@ function getArtistInitials(name?: string | null) {
 const MusicArtistPage = ({ item, config }: MusicArtistPageProps) => {
     const { t } = useTranslation('item');
     const { loadQueue } = useMusicPlayback();
-    const { setBackground } = usePageBackground();
     const [imageError, setImageError] = useState(false);
 
     const { data: albumCount, isLoading: loadingAlbumCount } = useArtistAlbumCount(item.Id);
     const { data: tracks, isLoading: loadingTracks } = useArtistTracks(item.Id);
 
-    const posterUrl = getPrimaryImageUrl(item.Id || '', { width: 512, height: 512 }, item.ImageTags?.Primary);
-
-    useEffect(() => {
-        if (imageError) {
-            setBackground(null);
-            return;
-        }
-
-        setBackground(
-            <div className="fixed top-0 left-0 w-full h-full -z-20 overflow-hidden">
-                <div className="absolute inset-0">
-                    <img
-                        src={posterUrl}
-                        alt=""
-                        className="h-full w-full scale-110 object-cover opacity-35 blur-3xl"
-                    />
-                </div>
-                <div className="absolute inset-0 bg-linear-to-b from-background/70 via-background/85 to-background" />
-            </div>
-        );
-
-        return () => setBackground(null);
-    }, [posterUrl, imageError, setBackground]);
+    const posterUrl = getPrimaryImageUrl(
+        item.Id || '',
+        { width: 512, height: 512 },
+        item.ImageTags?.Primary
+    );
+    const palette = useImagePalette(posterUrl, !imageError);
+    const onPalette = !!palette;
 
     const genreItems = useMemo(() => {
         if (item.GenreItems?.length) {
@@ -98,52 +82,108 @@ const MusicArtistPage = ({ item, config }: MusicArtistPageProps) => {
             ? t(albumCount === 1 ? 'album_count' : 'album_count_plural', { count: albumCount })
             : null;
 
+    const badgeClass = onPalette
+        ? 'border-white/20 bg-white/15 text-white backdrop-blur-sm hover:bg-white/20'
+        : undefined;
+    const genreBadgeClass = onPalette
+        ? 'border-white/25 bg-white/10 text-white/95 backdrop-blur-sm hover:bg-white/15'
+        : undefined;
+
     return (
         <div className="flex flex-col gap-10">
-            <section className="relative overflow-hidden rounded-2xl border border-border/60 bg-background/40 p-6 shadow-xl backdrop-blur-md sm:p-8 md:h-80 lg:h-96">
-                <div className="pointer-events-none absolute -right-16 -top-16 size-64 rounded-full bg-primary/10 blur-3xl" />
-                <div className="pointer-events-none absolute -bottom-20 -left-10 size-72 rounded-full bg-primary/5 blur-3xl" />
+            <section
+                className={cn(
+                    'relative overflow-hidden rounded-2xl border shadow-xl md:h-80 lg:h-96',
+                    !onPalette && 'border-border/60 bg-background/40 backdrop-blur-md'
+                )}
+            >
+                {onPalette && (
+                    <>
+                        <div
+                            className="absolute inset-0"
+                            style={{ background: palette.gradient }}
+                        />
+                        <div className="absolute inset-0 bg-black/20" />
+                        <div className="absolute inset-0 bg-linear-to-r from-black/35 via-black/10 to-black/25" />
+                    </>
+                )}
 
-                <div className="relative flex flex-col gap-8 md:h-full md:flex-row md:items-stretch md:gap-8">
-                    <div className="mx-auto flex shrink-0 items-center justify-center md:mx-0 md:h-full md:py-1">
+                <div className="relative flex flex-col md:h-full md:flex-row">
+                    <div className="relative aspect-square h-48 w-full shrink-0 sm:h-56 md:h-full md:w-auto">
                         {!imageError ? (
-                            <div className="relative aspect-square h-40 sm:h-52 md:h-full md:max-h-full">
+                            <>
                                 <img
                                     src={posterUrl}
                                     alt={item.Name || t('no_title')}
-                                    className="size-full rounded-full object-cover shadow-2xl ring-4 ring-background/80"
+                                    className="size-full object-cover"
                                     onError={() => setImageError(true)}
                                 />
-                                <Skeleton className="absolute inset-0 -z-10 size-full rounded-full" />
-                            </div>
+                                <Skeleton className="absolute inset-0 -z-10 size-full" />
+                                {onPalette && (
+                                    <div className="pointer-events-none absolute inset-y-0 right-0 hidden w-10 bg-linear-to-l from-black/30 to-transparent md:block" />
+                                )}
+                            </>
                         ) : (
-                            <div className="flex aspect-square h-40 items-center justify-center rounded-full bg-muted shadow-2xl ring-4 ring-background/80 sm:h-52 md:h-full md:max-h-full">
+                            <div className="flex size-full items-center justify-center bg-muted">
                                 {item.Name ? (
-                                    <span className="text-4xl font-bold text-muted-foreground sm:text-5xl">
+                                    <span
+                                        className={cn(
+                                            'text-4xl font-bold sm:text-5xl',
+                                            onPalette ? 'text-white/80' : 'text-muted-foreground'
+                                        )}
+                                    >
                                         {getArtistInitials(item.Name)}
                                     </span>
                                 ) : (
-                                    <Mic2 className="size-12 text-muted-foreground" />
+                                    <Mic2
+                                        className={cn(
+                                            'size-12',
+                                            onPalette ? 'text-white/80' : 'text-muted-foreground'
+                                        )}
+                                    />
                                 )}
                             </div>
                         )}
                     </div>
 
-                    <div className="flex min-h-0 min-w-0 flex-1 flex-col text-center md:h-full md:text-left">
+                    <div
+                        className={cn(
+                            'flex min-h-0 min-w-0 flex-1 flex-col p-6 text-center md:h-full md:p-8 md:text-left',
+                            onPalette && 'text-white'
+                        )}
+                    >
                         <div className="shrink-0">
-                            <p className="text-sm font-medium uppercase tracking-[0.2em] text-primary">
+                            <p
+                                className={cn(
+                                    'text-sm font-medium uppercase tracking-[0.2em]',
+                                    onPalette ? 'text-white/75' : 'text-primary'
+                                )}
+                            >
                                 {t('artist')}
                             </p>
-                            <h1 className="mt-2 line-clamp-2 text-4xl font-bold tracking-tight sm:text-5xl lg:text-6xl">
+                            <h1
+                                className={cn(
+                                    'mt-2 line-clamp-2 text-4xl font-bold tracking-tight sm:text-5xl lg:text-6xl',
+                                    onPalette && 'text-white drop-shadow-sm'
+                                )}
+                            >
                                 {item.Name}
                             </h1>
 
                             <div className="mt-4 flex flex-wrap items-center justify-center gap-2 md:justify-start">
                                 {loadingAlbumCount ? (
-                                    <Skeleton className="h-7 w-24 rounded-full" />
+                                    <Skeleton
+                                        className={cn(
+                                            'h-7 w-24 rounded-full',
+                                            onPalette && 'bg-white/20'
+                                        )}
+                                    />
                                 ) : (
                                     albumCountLabel && (
-                                        <Badge variant="secondary" className="rounded-full px-3 py-1">
+                                        <Badge
+                                            variant="secondary"
+                                            className={cn('rounded-full px-3 py-1', badgeClass)}
+                                        >
                                             {albumCountLabel}
                                         </Badge>
                                     )
@@ -153,7 +193,7 @@ const MusicArtistPage = ({ item, config }: MusicArtistPageProps) => {
                                         <Badge
                                             key={genre.id}
                                             variant="outline"
-                                            className="rounded-full"
+                                            className={cn('rounded-full', genreBadgeClass)}
                                             asChild
                                         >
                                             <Link to={`/item/${genre.id}`}>{genre.name}</Link>
@@ -162,7 +202,7 @@ const MusicArtistPage = ({ item, config }: MusicArtistPageProps) => {
                                         <Badge
                                             key={genre.name}
                                             variant="outline"
-                                            className="rounded-full"
+                                            className={cn('rounded-full', genreBadgeClass)}
                                         >
                                             {genre.name}
                                         </Badge>
@@ -172,8 +212,13 @@ const MusicArtistPage = ({ item, config }: MusicArtistPageProps) => {
                         </div>
 
                         {item.Overview && (
-                            <div className="mt-4 min-h-0 flex-1 md:overflow-y-auto md:overscroll-contain md:pr-2 [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-border">
-                                <p className="text-sm leading-relaxed text-muted-foreground sm:text-base md:text-left">
+                            <div className="mt-4 min-h-0 flex-1 md:overflow-y-auto md:overscroll-contain md:pr-2 [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-white/30">
+                                <p
+                                    className={cn(
+                                        'text-sm leading-relaxed sm:text-base md:text-left',
+                                        onPalette ? 'text-white/85' : 'text-muted-foreground'
+                                    )}
+                                >
                                     {item.Overview}
                                 </p>
                             </div>
@@ -182,7 +227,10 @@ const MusicArtistPage = ({ item, config }: MusicArtistPageProps) => {
                         <div className="mt-4 flex shrink-0 flex-wrap items-center justify-center gap-2 md:mt-auto md:justify-start md:pt-4">
                             <Button
                                 size="lg"
-                                className="rounded-full px-6"
+                                className={cn(
+                                    'rounded-full px-6',
+                                    onPalette && 'bg-white text-black hover:bg-white/90'
+                                )}
                                 onClick={handlePlayArtist}
                                 disabled={loadingTracks || !tracks?.length}
                             >
