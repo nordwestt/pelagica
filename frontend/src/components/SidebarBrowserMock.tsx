@@ -11,10 +11,9 @@ import {
     SelectTrigger,
     SelectValue,
 } from '@/components/ui/select';
-import { Skeleton } from '@/components/ui/skeleton';
 import { cn } from '@/lib/utils';
 import { useUserViews } from '@/hooks/api/useUserViews';
-import { useLibraryItems } from '@/hooks/api/useLibraryItems';
+import { useInfiniteLibraryItems } from '@/hooks/api/useInfiniteLibraryItems';
 import {
     buildLibrarySearchParams,
     collectionTypeToCategory,
@@ -22,10 +21,8 @@ import {
     type BrowserMediaCategory,
 } from '@/utils/sidebarLibraryNavigation';
 import { getIncludeItemTypesForCategory } from '@/utils/sidebarBrowseItems';
-import { SidebarBrowserListItem } from '@/components/SidebarBrowserListItem';
 import { useSidebarBrowser } from '@/context/SidebarBrowserContext';
-
-const SIDEBAR_RESULT_LIMIT = 100;
+import { SidebarBrowserResultsList } from '@/components/SidebarBrowserResultsList';
 
 const CATEGORY_OPTIONS: {
     value: BrowserMediaCategory | 'all';
@@ -59,7 +56,6 @@ export function SidebarBrowserMock({ className }: SidebarBrowserMockProps) {
         return collectionTypeToCategory(library?.CollectionType);
     }, [location.pathname, libraryIdFromUrl, views?.Items]);
 
-    // Sync from library URL when on /library (category lives in router-level context).
     useEffect(() => {
         if (location.pathname === '/library') {
             setCategory(categoryFromUrl);
@@ -77,17 +73,23 @@ export function SidebarBrowserMock({ className }: SidebarBrowserMockProps) {
     }, [libraryIdFromUrl, views?.Items, category]);
 
     const includeItemTypes = getIncludeItemTypesForCategory(category);
+    const listQueryKey = `${activeLibraryId}-${category}-${debouncedQuery}`;
 
-    const { data: libraryData, isLoading, isFetching } = useLibraryItems(activeLibraryId, {
-        limit: SIDEBAR_RESULT_LIMIT,
+    const {
+        data,
+        isLoading,
+        isFetchingNextPage,
+        hasNextPage,
+        fetchNextPage,
+    } = useInfiniteLibraryItems(activeLibraryId, {
         sortBy: ['Name'],
         sortOrder: 'Ascending',
         includeItemTypes,
         searchTerm: debouncedQuery || undefined,
     });
 
-    const items = libraryData?.items ?? [];
-    const totalCount = libraryData?.totalCount ?? 0;
+    const items = useMemo(() => data?.pages.flatMap((page) => page.items) ?? [], [data?.pages]);
+    const totalCount = data?.pages[0]?.totalCount ?? 0;
 
     const navigateToLibraryForCategory = (nextCategory: BrowserMediaCategory | 'all') => {
         const libraryId = findLibraryIdForCategory(views?.Items, nextCategory);
@@ -104,8 +106,6 @@ export function SidebarBrowserMock({ className }: SidebarBrowserMockProps) {
     const handleSelectItem = (itemId: string) => {
         navigate(`/item/${itemId}`);
     };
-
-    const showLoading = isLoading || (isFetching && items.length === 0);
 
     if (state === 'collapsed' && !isMobile) {
         return (
@@ -154,41 +154,32 @@ export function SidebarBrowserMock({ className }: SidebarBrowserMockProps) {
                 <div className="text-muted-foreground flex shrink-0 items-center justify-between px-0.5 text-xs font-medium">
                     <span>Results</span>
                     <span className="tabular-nums">
-                        {showLoading ? '…' : `${items.length}${totalCount > items.length ? ` / ${totalCount}` : ''}`}
+                        {isLoading
+                            ? '…'
+                            : `${items.length}${totalCount > items.length ? ` / ${totalCount}` : ''}`}
                     </span>
                 </div>
-                <ul className="flex min-h-0 flex-1 flex-col gap-0.5 overflow-y-auto pr-0.5 [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-sidebar-border">
-                    {!activeLibraryId && (
-                        <li className="text-muted-foreground py-6 text-center text-sm">
-                            No library available for this category.
-                        </li>
-                    )}
-                    {activeLibraryId && showLoading &&
-                        Array.from({ length: 8 }).map((_, i) => (
-                            <li key={i} className="flex items-center gap-2 px-1.5 py-1.5">
-                                <Skeleton className="size-10 shrink-0 rounded-md" />
-                                <div className="flex-1 space-y-1.5">
-                                    <Skeleton className="h-3.5 w-3/4" />
-                                    <Skeleton className="h-3 w-1/2" />
-                                </div>
-                            </li>
-                        ))}
-                    {activeLibraryId && !showLoading && items.length === 0 && (
-                        <li className="text-muted-foreground py-6 text-center text-sm">
-                            {debouncedQuery ? 'No matches for your search.' : 'This library is empty.'}
-                        </li>
-                    )}
-                    {activeLibraryId &&
-                        !showLoading &&
-                        items.map((item) => (
-                            <SidebarBrowserListItem
-                                key={item.Id}
-                                item={item}
-                                isActive={location.pathname === `/item/${item.Id}`}
-                                onSelect={(selected) => handleSelectItem(selected.Id!)}
-                            />
-                        ))}
-                </ul>
+                {!activeLibraryId ? (
+                    <p className="text-muted-foreground py-6 text-center text-sm">
+                        No library available for this category.
+                    </p>
+                ) : (
+                    <SidebarBrowserResultsList
+                        key={listQueryKey}
+                        items={items}
+                        isLoading={isLoading}
+                        isFetchingNextPage={isFetchingNextPage}
+                        hasNextPage={hasNextPage ?? false}
+                        fetchNextPage={fetchNextPage}
+                        activeItemPath={location.pathname}
+                        onSelectItem={handleSelectItem}
+                        emptyMessage={
+                            debouncedQuery
+                                ? 'No matches for your search.'
+                                : 'This library is empty.'
+                        }
+                    />
+                )}
             </div>
         </section>
     );

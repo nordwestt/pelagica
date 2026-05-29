@@ -22,7 +22,7 @@ export function SidebarBrowserListItem({ item, isActive, onSelect }: SidebarBrow
     const isSquare = item.Type === 'MusicAlbum';
 
     return (
-        <li>
+        <div role="listitem">
             <button
                 type="button"
                 onClick={() => onSelect(item)}
@@ -61,6 +61,6 @@ export function SidebarBrowserListItem({ item, isActive, onSelect }: SidebarBrow
                     </p>
                 </div>
             </button>
-        </li>
+        </div>
     );
 }
