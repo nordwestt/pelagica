@@ -21,7 +21,7 @@ import { getEffectiveTheme } from '@/utils/effectiveTheme';
 import { useEffect } from 'react';
 import { useSidebar } from '@/components/ui/sidebar';
 import { DynamicIcon, type IconName } from 'lucide-react/dynamic';
-import { SidebarBrowserMock } from '@/components/SidebarBrowserMock';
+import { SidebarBrowser } from '@/components/SidebarBrowser';
 
 function serverUrlToDomain(url: string) {
     try {
@@ -112,7 +112,7 @@ const AppSidebar = () => {
                 </SidebarMenu>
             </SidebarHeader>
             <SidebarContent className="gap-0 overflow-hidden pb-1">
-                <SidebarBrowserMock className="mx-1 min-h-0 flex-1 border-0 bg-transparent p-2" />
+                <SidebarBrowser className="mx-1 min-h-0 flex-1 border-0 bg-transparent p-2" />
                 {validLinks.length > 0 && (
                     <SidebarGroup className="shrink-0 py-1">
                         <SidebarGroupLabel className="h-7">Links</SidebarGroupLabel>

@@ -41,11 +41,11 @@ function toTabCategory(category: BrowserMediaCategory | 'all'): BrowserMediaCate
     return category === 'all' ? 'movie' : category;
 }
 
-type SidebarBrowserMockProps = {
+type SidebarBrowserProps = {
     className?: string;
 };
 
-export function SidebarBrowserMock({ className }: SidebarBrowserMockProps) {
+export function SidebarBrowser({ className }: SidebarBrowserProps) {
     const { state, isMobile } = useSidebar();
     const { category, setCategory, searchQuery, setSearchQuery, browseFilter, setBrowseFilter } =
         useSidebarBrowser();
