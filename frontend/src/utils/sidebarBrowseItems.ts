@@ -1,4 +1,5 @@
 import type { BaseItemDto } from '@jellyfin/sdk/lib/generated-client/models';
+import type { SidebarGenreItem } from '@/utils/enrichGenresWithItemCounts';
 import { getPrimaryImageUrl } from '@/utils/jellyfinUrls';
 
 export function getItemTypeLabel(type?: string | null): string {
@@ -46,14 +47,20 @@ export function getItemSubtitle(item: BaseItemDto): string {
 }
 
 export function getSidebarPosterUrl(item: BaseItemDto): string {
+    const genreItem = item as SidebarGenreItem;
+    const imageItemId = genreItem.SidebarCoverItemId ?? item.Id!;
+    const imageTag = genreItem.SidebarCoverItemId
+        ? genreItem.SidebarCoverImageTag
+        : item.ImageTags?.Primary;
     const isSquare =
-        item.Type === 'MusicAlbum' ||
-        item.Type === 'MusicArtist' ||
-        item.Type === 'Playlist' ||
-        item.Type === 'Genre';
+        !genreItem.SidebarCoverItemId &&
+        (item.Type === 'MusicAlbum' ||
+            item.Type === 'MusicArtist' ||
+            item.Type === 'Playlist' ||
+            item.Type === 'Genre');
     return getPrimaryImageUrl(
-        item.Id!,
+        imageItemId,
         isSquare ? { height: 112, width: 112 } : { height: 168, width: 112 },
-        item.ImageTags?.Primary
+        imageTag
     );
 }

@@ -2,17 +2,40 @@ import { getApi } from '@/api/getApi';
 import type { BaseItemDto, BaseItemKind } from '@jellyfin/sdk/lib/generated-client/models';
 import { getItemsApi } from '@jellyfin/sdk/lib/utils/api/items-api';
 
-const countCache = new Map<string, number>();
+/** Genre rows enriched for sidebar browse — includes a scoped cover item for thumbnails. */
+export type SidebarGenreItem = BaseItemDto & {
+    SidebarCoverItemId?: string;
+    SidebarCoverImageTag?: string;
+};
+
+const enrichmentCache = new Map<string, { count: number; cover?: { itemId: string; imageTag?: string } }>();
 
 function cacheKey(genreId: string, includeItemTypes: BaseItemKind[], parentId?: string | null) {
     return `${genreId}:${parentId ?? 'global'}:${includeItemTypes.slice().sort().join(',')}`;
+}
+
+function withCoverFields(
+    genre: BaseItemDto,
+    count: number,
+    cover?: { itemId: string; imageTag?: string }
+): SidebarGenreItem {
+    return {
+        ...genre,
+        ChildCount: count,
+        ...(cover
+            ? {
+                  SidebarCoverItemId: cover.itemId,
+                  SidebarCoverImageTag: cover.imageTag,
+              }
+            : {}),
+    };
 }
 
 export async function enrichGenresWithItemCounts(
     genres: BaseItemDto[],
     includeItemTypes: BaseItemKind[],
     parentId?: string | null
-): Promise<BaseItemDto[]> {
+): Promise<SidebarGenreItem[]> {
     if (genres.length === 0) return genres;
 
     const api = getApi();
@@ -23,9 +46,9 @@ export async function enrichGenresWithItemCounts(
             if (!genre.Id) return genre;
 
             const key = cacheKey(genre.Id, includeItemTypes, parentId);
-            const cached = countCache.get(key);
+            const cached = enrichmentCache.get(key);
             if (cached !== undefined) {
-                return { ...genre, ChildCount: cached };
+                return withCoverFields(genre, cached.count, cached.cover);
             }
 
             try {
@@ -39,8 +62,18 @@ export async function enrichGenresWithItemCounts(
                 });
 
                 const count = response.data?.TotalRecordCount ?? 0;
-                countCache.set(key, count);
-                return { ...genre, ChildCount: count };
+                const coverItem = response.data?.Items?.[0];
+                const cover =
+                    coverItem?.Id != null
+                        ? {
+                              itemId: coverItem.Id,
+                              imageTag: coverItem.ImageTags?.Primary,
+                          }
+                        : undefined;
+
+                enrichmentCache.set(key, { count, cover });
+
+                return withCoverFields(genre, count, cover);
             } catch {
                 return genre;
             }
