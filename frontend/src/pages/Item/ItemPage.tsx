@@ -27,7 +27,7 @@ const ItemPageSkeleton = memo(() => {
             </div>
 
             {/* logo */}
-            <div className="h-2/5 flex items-center justify-center">
+            <div className="h-2/5 flex items-center justify-center py-30">
                 <Skeleton className="relative mx-auto px-4 h-32 w-48 object-contain rounded-md" />
             </div>
 
