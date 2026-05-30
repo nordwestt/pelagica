@@ -14,6 +14,14 @@ import (
 	"github.com/robfig/cron/v3"
 )
 
+type ConsentStatus int
+
+const (
+	ConsentGiven ConsentStatus = iota
+	ConsentUnspecified
+	ConsentDenied
+)
+
 func getPingToken() string {
 	return os.Getenv("COLLECTOR_PING_TOKEN")
 }
@@ -48,7 +56,7 @@ func getStatsConsentFile() string {
 // 0 -> consent explicitly given
 // 1 -> consent not specified or invalid
 // 2 -> consent explicitly denied
-func HasStatsConsent() int {
+func HasStatsConsent() ConsentStatus {
 	parseBool := func(v string) (bool, bool) {
 		switch strings.ToLower(strings.TrimSpace(v)) {
 		case "true":
@@ -63,9 +71,9 @@ func HasStatsConsent() int {
 	if envValue := os.Getenv("COLLECTOR_STATS_CONSENT"); envValue != "" {
 		if val, ok := parseBool(envValue); ok {
 			if val {
-				return 0
+				return ConsentGiven
 			}
-			return 2
+			return ConsentDenied
 		}
 	}
 
@@ -74,14 +82,14 @@ func HasStatsConsent() int {
 		if err == nil {
 			if val, ok := parseBool(string(content)); ok {
 				if val {
-					return 0
+					return ConsentGiven
 				}
-				return 2
+				return ConsentDenied
 			}
 		}
 	}
 
-	return 1
+	return ConsentUnspecified
 }
 
 func WriteStatsConsent(consent bool) error {
@@ -173,7 +181,7 @@ func sendPing(baseURL, instanceID, version, token string) error {
 func RegisterStatsJob() *cron.Cron {
 	c := cron.New()
 	_, err := c.AddFunc("0 0 * * *", func() {
-		if HasStatsConsent() != 0 {
+		if HasStatsConsent() != ConsentGiven {
 			fmt.Println("Stats collection skipped: user has not given consent")
 			return
 		}
