@@ -74,10 +74,21 @@ const PageContent = ({
     const effectiveTheme = getEffectiveTheme(theme);
     const [showLoader, setShowLoader] = useState(true);
     const [sidebarOpen, setSidebarOpen] = useState<boolean | null>(() => getSidebarState());
+    const [browseTransitionActive, setBrowseTransitionActive] = useState(browseMode);
 
     useEffect(() => {
         if (title) document.title = title;
     }, [title]);
+
+    useEffect(() => {
+        if (browseMode) {
+            setBrowseTransitionActive(true);
+            return;
+        }
+
+        const timeout = window.setTimeout(() => setBrowseTransitionActive(false), 500);
+        return () => window.clearTimeout(timeout);
+    }, [browseMode]);
 
     useEffect(() => {
         if (requiresAuth && !isLoggedIn()) {
@@ -149,15 +160,21 @@ const PageContent = ({
           ? SIDEBAR_WIDTH_MOBILE
           : SIDEBAR_WIDTH;
 
+    const useBrowseTransition = browseMode || browseTransitionActive;
+
     return (
         <SidebarProvider
             className={`relative min-h-dvh h-dvh ${containerClassName ?? ''}`}
             style={
                 {
                     '--sidebar-width': sidebarWidth,
+                    '--sidebar-width-duration': useBrowseTransition ? '480ms' : '250ms',
+                    '--sidebar-width-ease': useBrowseTransition
+                        ? 'cubic-bezier(0.34, 1.18, 0.64, 1)'
+                        : 'cubic-bezier(0.4, 0, 0.2, 1)',
                 } as CSSProperties
             }
-            open={sidebarOpen ?? true}
+            open={sidebarOpen ?? false}
             onOpenChange={(open) => {
                 setSidebarOpen(open);
                 saveSidebarState(open);

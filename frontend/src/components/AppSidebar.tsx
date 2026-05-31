@@ -9,6 +9,7 @@ import {
     SidebarMenu,
     SidebarMenuButton,
     SidebarMenuItem,
+    SidebarRail,
     useSidebar,
 } from '@/components/ui/sidebar';
 import { ChartLine } from 'lucide-react';
@@ -52,7 +53,7 @@ export const LinkSidebarItem = ({
         <SidebarMenuItem>
             <SidebarMenuButton
                 className="cursor-pointer"
-                title={text}
+                tooltip={text}
                 onClick={() => {
                     window.open(url, '_blank');
                 }}
@@ -98,6 +99,7 @@ const AppSidebar = () => {
                         asChild
                         className="hover:bg-sidebar-accent cursor-pointer"
                         isActive={location.pathname === '/'}
+                        tooltip={t('home')}
                     >
                         <Link to="/" title="Home">
                             <Avatar className="h-8 w-8 p-1 rounded-lg">
@@ -152,7 +154,7 @@ const AppSidebar = () => {
                         <SidebarMenuItem>
                             <SidebarMenuButton
                                 className="cursor-pointer"
-                                title="Streamystats"
+                                tooltip="Streamystats"
                                 onClick={() => window.open(config.streamystatsUrl, '_blank')}
                             >
                                 <ChartLine />
@@ -163,6 +165,7 @@ const AppSidebar = () => {
                 )}
                 <NavUser />
             </SidebarFooter>
+            <SidebarRail />
         </Sidebar>
     );
 };

@@ -14,7 +14,7 @@ import {
     useSidebar,
 } from '@/components/ui/sidebar';
 import { useUserViews } from '@/hooks/api/useUserViews';
-import { useSidebarBrowser } from '@/context/SidebarBrowserContext';
+import { useSidebarBrowser, saveExpandedBeforeBrowse } from '@/context/SidebarBrowserContext';
 import {
     buildLibrarySearchParams,
     getSupportedLibraries,
@@ -25,7 +25,7 @@ export function SidebarNavigation() {
     const location = useLocation();
     const [searchParams] = useSearchParams();
     const { setBrowseMode } = useSidebarBrowser();
-    const { isMobile, setOpen, setOpenMobile } = useSidebar();
+    const { isMobile, open, setOpen, setOpenMobile } = useSidebar();
     const { data: views } = useUserViews();
     const libraries = getSupportedLibraries(views?.Items);
     const defaultLibraryId = libraries[0]?.Id;
@@ -80,6 +80,7 @@ export function SidebarNavigation() {
                             <SidebarMenuButton
                                 tooltip={t('browse_library')}
                                 onClick={() => {
+                                    saveExpandedBeforeBrowse(open);
                                     setBrowseMode(true);
                                     if (isMobile) {
                                         setOpenMobile(true);

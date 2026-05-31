@@ -24,7 +24,7 @@ import {
     isGenresBrowseFilter,
 } from '@/utils/sidebarBrowseFilters';
 import type { BaseItemDto } from '@jellyfin/sdk/lib/generated-client/models';
-import { useSidebarBrowser } from '@/context/SidebarBrowserContext';
+import { useSidebarBrowser, readExpandedBeforeBrowse } from '@/context/SidebarBrowserContext';
 import { SidebarBrowserResultsList } from '@/components/SidebarBrowserResultsList';
 import { SidebarBrowseFilterTabs } from '@/components/SidebarBrowseFilterTabs';
 import { useTranslation } from 'react-i18next';
@@ -49,7 +49,7 @@ type SidebarBrowserProps = {
 
 export function SidebarBrowser({ className }: SidebarBrowserProps) {
     const { t } = useTranslation('sidebar');
-    const { state, isMobile, setOpenMobile } = useSidebar();
+    const { state, isMobile, setOpen, setOpenMobile } = useSidebar();
     const { category, setCategory, searchQuery, setSearchQuery, browseFilter, setBrowseFilter, setBrowseMode } =
         useSidebarBrowser();
     const { data: views } = useUserViews();
@@ -169,7 +169,11 @@ export function SidebarBrowser({ className }: SidebarBrowserProps) {
 
     const handleExitBrowseMode = () => {
         setBrowseMode(false);
-        if (isMobile) setOpenMobile(false);
+        if (isMobile) {
+            setOpenMobile(false);
+        } else {
+            setOpen(readExpandedBeforeBrowse());
+        }
     };
 
     if (state === 'collapsed' && !isMobile) {
