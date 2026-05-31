@@ -9,9 +9,11 @@ import {
     SidebarMenu,
     SidebarMenuButton,
     SidebarMenuItem,
+    useSidebar,
 } from '@/components/ui/sidebar';
 import { ChartLine } from 'lucide-react';
 import { Link, useLocation } from 'react-router';
+import { useTranslation } from 'react-i18next';
 import { NavUser } from './NavUser';
 import { Avatar, AvatarFallback, AvatarImage } from './ui/avatar';
 import { useConfig } from '@/hooks/api/useConfig';
@@ -19,9 +21,10 @@ import { getServerUrl } from '@/utils/localstorageCredentials';
 import { useTheme } from './theme-provider';
 import { getEffectiveTheme } from '@/utils/effectiveTheme';
 import { useEffect } from 'react';
-import { useSidebar } from '@/components/ui/sidebar';
 import { DynamicIcon, type IconName } from 'lucide-react/dynamic';
 import { SidebarBrowser } from '@/components/SidebarBrowser';
+import { SidebarNavigation } from '@/components/SidebarNavigation';
+import { useSidebarBrowser } from '@/context/SidebarBrowserContext';
 
 function serverUrlToDomain(url: string) {
     try {
@@ -64,7 +67,9 @@ export const LinkSidebarItem = ({
 };
 
 const AppSidebar = () => {
+    const { t } = useTranslation('sidebar');
     const { setOpen, isMobile } = useSidebar();
+    const { browseMode } = useSidebarBrowser();
     const location = useLocation();
     const { config } = useConfig();
     const serverUrl = getServerUrl();
@@ -79,8 +84,10 @@ const AppSidebar = () => {
     const validLinks = config?.links?.filter((link) => link.url && link.text) ?? [];
 
     useEffect(() => {
-        if (!isMobile) setOpen(true);
-    }, [isMobile, setOpen]);
+        if (browseMode && !isMobile) {
+            setOpen(true);
+        }
+    }, [browseMode, isMobile, setOpen]);
 
     return (
         <Sidebar variant="floating" collapsible="icon">
@@ -111,11 +118,19 @@ const AppSidebar = () => {
                     </SidebarMenuButton>
                 </SidebarMenu>
             </SidebarHeader>
-            <SidebarContent className="gap-0 overflow-hidden pb-1">
-                <SidebarBrowser className="mx-1 min-h-0 flex-1 border-0 bg-transparent p-2" />
-                {validLinks.length > 0 && (
+            <SidebarContent
+                className={
+                    browseMode ? 'gap-0 overflow-hidden pb-1' : 'gap-2 overflow-auto pb-1'
+                }
+            >
+                {browseMode ? (
+                    <SidebarBrowser className="mx-1 min-h-0 flex-1 border-0 bg-transparent p-2" />
+                ) : (
+                    <SidebarNavigation />
+                )}
+                {!browseMode && validLinks.length > 0 && (
                     <SidebarGroup className="shrink-0 py-1">
-                        <SidebarGroupLabel className="h-7">Links</SidebarGroupLabel>
+                        <SidebarGroupLabel className="h-7">{t('category_links')}</SidebarGroupLabel>
                         <SidebarGroupContent>
                             <SidebarMenu>
                                 {validLinks.map((link, index) => (

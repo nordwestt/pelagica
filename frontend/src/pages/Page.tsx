@@ -1,6 +1,13 @@
 import AppSidebar from '@/components/AppSidebar';
 import { Button } from '@/components/ui/button';
-import { SidebarProvider, SidebarTrigger } from '@/components/ui/sidebar';
+import {
+    SIDEBAR_WIDTH,
+    SIDEBAR_WIDTH_BROWSE,
+    SIDEBAR_WIDTH_BROWSE_MOBILE,
+    SIDEBAR_WIDTH_MOBILE,
+    SidebarProvider,
+    SidebarTrigger,
+} from '@/components/ui/sidebar';
 import { type CSSProperties, type PropsWithChildren, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router';
 import { useCurrentUser } from '@/hooks/api/useCurrentUser';
@@ -16,6 +23,8 @@ import { logout } from '@/api/logout';
 import { getApi } from '@/api/getApi';
 import FullPageError from '@/components/FullPageError';
 import { getSidebarState, saveSidebarState } from '../utils/localstorageSidebar';
+import { useSidebarBrowser } from '@/context/SidebarBrowserContext';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 interface PageProps {
     title?: string;
@@ -57,6 +66,8 @@ const PageContent = ({
     const navigate = useNavigate();
     const { isLoading, isError, data: user } = useCurrentUser();
     const { background } = usePageBackground();
+    const { browseMode } = useSidebarBrowser();
+    const isMobile = useIsMobile();
     const serverUrl = getServerUrl();
     const serverDomain = serverUrl ? serverUrlToDomain(serverUrl) : null;
     const { theme } = useTheme();
@@ -130,12 +141,20 @@ const PageContent = ({
         );
     }
 
+    const sidebarWidth = browseMode
+        ? isMobile
+            ? SIDEBAR_WIDTH_BROWSE_MOBILE
+            : SIDEBAR_WIDTH_BROWSE
+        : isMobile
+          ? SIDEBAR_WIDTH_MOBILE
+          : SIDEBAR_WIDTH;
+
     return (
         <SidebarProvider
             className={`relative min-h-dvh h-dvh ${containerClassName ?? ''}`}
             style={
                 {
-                    '--sidebar-width': '28rem',
+                    '--sidebar-width': sidebarWidth,
                 } as CSSProperties
             }
             open={sidebarOpen ?? true}

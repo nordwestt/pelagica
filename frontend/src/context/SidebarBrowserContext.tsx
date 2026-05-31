@@ -13,6 +13,15 @@ export type SidebarBrowseCategory = BrowserMediaCategory | 'all';
 const CATEGORY_STORAGE_KEY = 'pelagica_sidebar_browse_category';
 const SEARCH_STORAGE_KEY = 'pelagica_sidebar_browse_search';
 const FILTER_STORAGE_KEY = 'pelagica_sidebar_browse_filter';
+const BROWSE_MODE_STORAGE_KEY = 'pelagica_sidebar_browse_mode';
+
+function readStoredBrowseMode(): boolean {
+    try {
+        return sessionStorage.getItem(BROWSE_MODE_STORAGE_KEY) === 'true';
+    } catch {
+        return false;
+    }
+}
 
 function parseStoredCategory(value: string): SidebarBrowseCategory | null {
     if (value === 'music' || value === 'series' || value === 'movie') return value;
@@ -58,6 +67,8 @@ function readStoredBrowseFilter(category: BrowserMediaCategory): SidebarBrowseFi
 }
 
 type SidebarBrowserContextValue = {
+    browseMode: boolean;
+    setBrowseMode: (enabled: boolean) => void;
     category: SidebarBrowseCategory;
     setCategory: (category: SidebarBrowseCategory) => void;
     searchQuery: string;
@@ -69,11 +80,21 @@ type SidebarBrowserContextValue = {
 const SidebarBrowserContext = React.createContext<SidebarBrowserContextValue | null>(null);
 
 export function SidebarBrowserProvider({ children }: { children: React.ReactNode }) {
+    const [browseMode, setBrowseModeState] = React.useState(readStoredBrowseMode);
     const [category, setCategoryState] = React.useState<SidebarBrowseCategory>(readStoredCategory);
     const [searchQuery, setSearchQueryState] = React.useState(readStoredSearchQuery);
     const [browseFilter, setBrowseFilterState] = React.useState<SidebarBrowseFilter>(() =>
         readStoredBrowseFilter(toTabCategory(readStoredCategory()))
     );
+
+    const setBrowseMode = React.useCallback((enabled: boolean) => {
+        setBrowseModeState(enabled);
+        try {
+            sessionStorage.setItem(BROWSE_MODE_STORAGE_KEY, String(enabled));
+        } catch {
+            // ignore
+        }
+    }, []);
 
     const setCategory = React.useCallback((next: SidebarBrowseCategory) => {
         const tabCategory = toTabCategory(next);
@@ -107,6 +128,8 @@ export function SidebarBrowserProvider({ children }: { children: React.ReactNode
 
     const value = React.useMemo(
         () => ({
+            browseMode,
+            setBrowseMode,
             category,
             setCategory,
             searchQuery,
@@ -114,7 +137,16 @@ export function SidebarBrowserProvider({ children }: { children: React.ReactNode
             browseFilter,
             setBrowseFilter,
         }),
-        [category, setCategory, searchQuery, setSearchQuery, browseFilter, setBrowseFilter]
+        [
+            browseMode,
+            setBrowseMode,
+            category,
+            setCategory,
+            searchQuery,
+            setSearchQuery,
+            browseFilter,
+            setBrowseFilter,
+        ]
     );
 
     return (

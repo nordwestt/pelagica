@@ -1,10 +1,11 @@
 'use client';
 
 import { useDeferredValue, useEffect, useMemo } from 'react';
-import { Film, Music2, Search, Tv } from 'lucide-react';
+import { ArrowLeft, Film, Music2, Search, Tv } from 'lucide-react';
 import { useLocation, useNavigate, useSearchParams } from 'react-router';
 import { SidebarInput, useSidebar } from '@/components/ui/sidebar';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { useUserViews } from '@/hooks/api/useUserViews';
 import { useCurrentUser } from '@/hooks/api/useCurrentUser';
@@ -26,6 +27,7 @@ import type { BaseItemDto } from '@jellyfin/sdk/lib/generated-client/models';
 import { useSidebarBrowser } from '@/context/SidebarBrowserContext';
 import { SidebarBrowserResultsList } from '@/components/SidebarBrowserResultsList';
 import { SidebarBrowseFilterTabs } from '@/components/SidebarBrowseFilterTabs';
+import { useTranslation } from 'react-i18next';
 
 const CATEGORY_TABS: {
     value: BrowserMediaCategory;
@@ -46,8 +48,9 @@ type SidebarBrowserProps = {
 };
 
 export function SidebarBrowser({ className }: SidebarBrowserProps) {
-    const { state, isMobile } = useSidebar();
-    const { category, setCategory, searchQuery, setSearchQuery, browseFilter, setBrowseFilter } =
+    const { t } = useTranslation('sidebar');
+    const { state, isMobile, setOpenMobile } = useSidebar();
+    const { category, setCategory, searchQuery, setSearchQuery, browseFilter, setBrowseFilter, setBrowseMode } =
         useSidebarBrowser();
     const { data: views } = useUserViews();
     const { data: user } = useCurrentUser();
@@ -164,12 +167,16 @@ export function SidebarBrowser({ className }: SidebarBrowserProps) {
           ? !!user?.Id
           : !!activeLibraryId;
 
+    const handleExitBrowseMode = () => {
+        setBrowseMode(false);
+        if (isMobile) setOpenMobile(false);
+    };
+
     if (state === 'collapsed' && !isMobile) {
         return (
             <p className="text-muted-foreground px-3 py-6 text-center text-xs leading-relaxed">
-                Expand the sidebar
+                {t('expand_for_browse')}
                 <span className="text-foreground block font-medium">Ctrl+B</span>
-                to browse
             </p>
         );
     }
@@ -179,7 +186,19 @@ export function SidebarBrowser({ className }: SidebarBrowserProps) {
             data-testid="sidebar-browser"
             className={cn('flex min-h-0 min-w-0 flex-1 flex-col gap-2', className)}
         >
-            <h2 className="px-0.5 text-sm font-semibold leading-tight">Browse</h2>
+            <div className="flex shrink-0 items-center justify-between gap-2 px-0.5">
+                <h2 className="text-sm font-semibold leading-tight">{t('browse_library')}</h2>
+                <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    className="h-7 shrink-0 px-2 text-xs"
+                    onClick={handleExitBrowseMode}
+                >
+                    <ArrowLeft className="size-3.5" />
+                    {t('back')}
+                </Button>
+            </div>
 
             <div className="relative shrink-0">
                 <Search className="text-muted-foreground pointer-events-none absolute top-1/2 left-2.5 size-4 -translate-y-1/2" />

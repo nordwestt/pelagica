@@ -22,8 +22,10 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/comp
 
 const SIDEBAR_COOKIE_NAME = 'sidebar_state';
 const SIDEBAR_COOKIE_MAX_AGE = 60 * 60 * 24 * 7;
-const SIDEBAR_WIDTH = '28rem';
-const SIDEBAR_WIDTH_MOBILE = '24rem';
+const SIDEBAR_WIDTH = '16rem';
+const SIDEBAR_WIDTH_BROWSE = '28rem';
+const SIDEBAR_WIDTH_MOBILE = '18rem';
+const SIDEBAR_WIDTH_BROWSE_MOBILE = '24rem';
 const SIDEBAR_WIDTH_ICON = '3rem';
 const SIDEBAR_KEYBOARD_SHORTCUT = 'b';
 
@@ -180,11 +182,6 @@ function Sidebar({
                     data-slot="sidebar"
                     data-mobile="true"
                     className="bg-sidebar text-sidebar-foreground w-(--sidebar-width) p-0 [&>button]:hidden"
-                    style={
-                        {
-                            '--sidebar-width': SIDEBAR_WIDTH_MOBILE,
-                        } as React.CSSProperties
-                    }
                     side={side}
                 >
                     <SheetHeader className="sr-only">
@@ -693,4 +690,8 @@ export {
     SidebarSeparator,
     SidebarTrigger,
     useSidebar,
+    SIDEBAR_WIDTH,
+    SIDEBAR_WIDTH_BROWSE,
+    SIDEBAR_WIDTH_MOBILE,
+    SIDEBAR_WIDTH_BROWSE_MOBILE,
 };
