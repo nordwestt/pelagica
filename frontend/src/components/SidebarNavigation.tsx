@@ -55,18 +55,6 @@ export function SidebarNavigation() {
                         <SidebarMenuItem>
                             <SidebarMenuButton
                                 asChild
-                                isActive={location.pathname === '/library'}
-                                tooltip={t('library')}
-                            >
-                                <Link to={libraryHref}>
-                                    <Library />
-                                    <span>{t('library')}</span>
-                                </Link>
-                            </SidebarMenuButton>
-                        </SidebarMenuItem>
-                        <SidebarMenuItem>
-                            <SidebarMenuButton
-                                asChild
                                 isActive={location.pathname === '/search'}
                                 tooltip={t('search')}
                             >
@@ -96,6 +84,7 @@ export function SidebarNavigation() {
                     </SidebarMenu>
                 </SidebarGroupContent>
             </SidebarGroup>
+            <hr className='mx-2'></hr>
 
             {libraries.length > 0 && (
                 <SidebarGroup>
