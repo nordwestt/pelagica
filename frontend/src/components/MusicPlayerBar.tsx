@@ -15,7 +15,7 @@ import { Slider } from './ui/slider';
 import { getPrimaryImageUrl } from '@/utils/jellyfinUrls';
 import { useMusicPlayback } from '@/hooks/useMusicPlayback';
 import { useIsMobile } from '@/hooks/use-mobile';
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useLyrics } from '@/features/lyrics/api/useLyrics';
 import { processLyrics } from '@/features/lyrics/utils/lyrics';
@@ -56,18 +56,16 @@ const MusicPlayerBar = () => {
     } = useMusicPlayback();
     const isMobile = useIsMobile();
     const [isExpanded, setIsExpanded] = useState(false);
-    const [isLyricsOpen, setIsLyricsOpen] = useState(false);
-    const [showLyricsInline, setShowLyricsInline] = useState(false);
+    const [lyricsOpenTrackId, setLyricsOpenTrackId] = useState<string | null>(null);
+    const [inlineLyricsTrackId, setInlineLyricsTrackId] = useState<string | null>(null);
 
     const { data: lyricsData, isPending: isLyricsLoading } = useLyrics(currentTrack?.id);
     const processedLyrics = processLyrics(lyricsData);
     const hasLyrics = !!processedLyrics;
     const showLyricsButton = isLyricsLoading || hasLyrics;
 
-    useEffect(() => {
-        setIsLyricsOpen(false);
-        setShowLyricsInline(false);
-    }, [currentTrack?.id]);
+    const isLyricsOpen = lyricsOpenTrackId === currentTrack?.id;
+    const showLyricsInline = inlineLyricsTrackId === currentTrack?.id;
 
     const handleLineClick = useCallback(
         (startTicks: number) => {
@@ -79,13 +77,16 @@ const MusicPlayerBar = () => {
         [isPlaying, play, seek],
     );
     const toggleDesktopLyrics = useCallback(() => {
-        setIsLyricsOpen((prev) => !prev);
-    }, []);
-
+        setLyricsOpenTrackId((prev) =>
+            prev === currentTrack?.id ? null : (currentTrack?.id ?? null),
+        );
+    }, [currentTrack?.id]);
 
     const toggleMobileLyrics = useCallback(() => {
-        setShowLyricsInline((prev) => !prev);
-    }, []);
+        setInlineLyricsTrackId((prev) =>
+            prev === currentTrack?.id ? null : (currentTrack?.id ?? null),
+        );
+    }, [currentTrack?.id]);
 
     if (!currentTrack) return null;
 
@@ -378,7 +379,7 @@ const MusicPlayerBar = () => {
                                 {...lyricsPanelProps}
                                 enabled={isLyricsOpen}
                                 onClose={() => {
-                                    setIsLyricsOpen(false);
+                                    setLyricsOpenTrackId(null);
                                 }}
                             />
                         </div>

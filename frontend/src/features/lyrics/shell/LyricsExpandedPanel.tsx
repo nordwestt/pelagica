@@ -50,6 +50,7 @@ const LyricsExpandedPanel = ({
             </div>
             <div className="relative min-h-0 flex-1">
                 <LyricsDisplay
+                    key={enabled ? 'open' : 'closed'}
                     lyrics={lyrics}
                     currentTime={currentTime}
                     onLineClick={onLineClick}

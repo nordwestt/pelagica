@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { LyricLine } from '@jellyfin/sdk/lib/generated-client/models';
 import { lyricsAutoScrollGraceMs } from '../constants';
 import { useLyricsEdgePadding } from './useLyricsEdgePadding';
@@ -17,12 +17,22 @@ export function useSyncedLyrics({
     offset,
     enabled = true,
 }: UseSyncedLyricsOptions) {
-    const [activeIndex, setActiveIndex] = useState(-1);
-    const [autoScrollEnabled, setAutoScrollEnabled] = useState(true);
+    const [autoScrollPaused, setAutoScrollPaused] = useState(false);
     const lineRefs = useRef<(HTMLElement | null)[]>([]);
     const graceTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
     const isProgrammaticScrollRef = useRef(false);
     const { containerRef, edgePadding } = useLyricsEdgePadding(enabled);
+
+    const autoScrollEnabled = enabled && !autoScrollPaused;
+
+    const activeIndex = useMemo(() => {
+        if (!enabled || !lines.length) {
+            return -1;
+        }
+
+        const adjustedTime = applyOffset(currentTime, offset);
+        return getActiveLineIndex(adjustedTime, lines);
+    }, [currentTime, enabled, lines, offset]);
 
     const clearGraceTimer = useCallback(() => {
         if (graceTimerRef.current) {
@@ -31,22 +41,11 @@ export function useSyncedLyrics({
         }
     }, []);
 
-    useEffect(() => {
-        if (!enabled || !lines.length) {
-            setActiveIndex(-1);
-            return;
-        }
-
-        const adjustedTime = applyOffset(currentTime, offset);
-        setActiveIndex(getActiveLineIndex(adjustedTime, lines));
-    }, [currentTime, enabled, lines, offset]);
-
     useEffect(() => clearGraceTimer, [clearGraceTimer]);
 
     useEffect(() => {
         if (!enabled) {
             clearGraceTimer();
-            setAutoScrollEnabled(true);
         }
     }, [clearGraceTimer, enabled]);
 
@@ -77,19 +76,19 @@ export function useSyncedLyrics({
     );
 
     useEffect(() => {
-        if (!enabled || !autoScrollEnabled || activeIndex < 0) {
+        if (!autoScrollEnabled || activeIndex < 0) {
             return;
         }
 
         scrollActiveLineIntoView('smooth');
-    }, [activeIndex, autoScrollEnabled, enabled, scrollActiveLineIntoView]);
+    }, [activeIndex, autoScrollEnabled, scrollActiveLineIntoView]);
 
     const pauseAutoScroll = useCallback(() => {
-        setAutoScrollEnabled(false);
+        setAutoScrollPaused(true);
         clearGraceTimer();
 
         graceTimerRef.current = setTimeout(() => {
-            setAutoScrollEnabled(true);
+            setAutoScrollPaused(false);
         }, lyricsAutoScrollGraceMs);
     }, [clearGraceTimer]);
 
@@ -103,7 +102,7 @@ export function useSyncedLyrics({
 
     const enableAutoScroll = useCallback(() => {
         clearGraceTimer();
-        setAutoScrollEnabled(true);
+        setAutoScrollPaused(false);
     }, [clearGraceTimer]);
 
     const setLineRef = useCallback((index: number, element: HTMLElement | null) => {
@@ -112,7 +111,6 @@ export function useSyncedLyrics({
 
     return {
         activeIndex,
-        autoScrollEnabled,
         containerRef,
         edgePadding,
         enableAutoScroll,
