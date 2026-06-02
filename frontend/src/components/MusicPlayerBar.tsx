@@ -76,10 +76,10 @@ const MusicPlayerBar = () => {
         },
         [isPlaying, play, seek],
     );
-
     const toggleDesktopLyrics = useCallback(() => {
         setIsLyricsOpen((prev) => !prev);
     }, []);
+
 
     const toggleMobileLyrics = useCallback(() => {
         setShowLyricsInline((prev) => !prev);
@@ -253,22 +253,9 @@ const MusicPlayerBar = () => {
     }
 
     return (
-        <div className="p-1 sticky bottom-0 z-100">
-            <div className="bg-sidebar/90 border-sidebar-border flex w-full flex-col overflow-hidden rounded-lg border shadow-sm backdrop-blur-lg">
-                <div
-                    className={cn(
-                        'overflow-hidden transition-[max-height] duration-500 ease-[cubic-bezier(0.34,1.56,0.64,1)]',
-                        isLyricsOpen ? 'max-h-[calc(70vh-7rem)]' : 'max-h-0',
-                    )}
-                >
-                    {lyricsPanelProps && (
-                        <LyricsExpandedPanel
-                            {...lyricsPanelProps}
-                            onClose={() => setIsLyricsOpen(false)}
-                        />
-                    )}
-                </div>
-                <div className="flex shrink-0 items-center justify-between p-3">
+        <div className="sticky bottom-0 z-100 w-full p-1">
+            <div className="relative">
+                <div className="relative z-10 flex w-full items-center justify-between rounded-lg border border-sidebar-border bg-sidebar/90 p-3 shadow-sm backdrop-blur-lg">
                     <div className="flex flex-1 items-center gap-2">
                         <img
                             src={getPrimaryImageUrl(currentTrack.id, {
@@ -367,6 +354,25 @@ const MusicPlayerBar = () => {
                         </Button>
                     </div>
                 </div>
+                {lyricsPanelProps && (
+                    <div
+                        className={cn(
+                            'absolute bottom-full left-1/2 -translate-x-1/2 overflow-hidden',
+                            'transition-[max-height] duration-500 ease-[cubic-bezier(0.34,1.56,0.64,1)]',
+                            'w-[min(50vw,42rem)] min-w-[min(100%,20rem)]',
+                            isLyricsOpen ? 'max-h-[calc(70vh)]' : 'max-h-0',
+                        )}
+                    >
+                        <div className="overflow-hidden rounded-t-lg border border-sidebar-border bg-sidebar/90 shadow-sm backdrop-blur-lg">
+                            <LyricsExpandedPanel
+                                {...lyricsPanelProps}
+                                onClose={() => {
+                                    setIsLyricsOpen(false);
+                                }}
+                            />
+                        </div>
+                    </div>
+                )}
             </div>
         </div>
     );

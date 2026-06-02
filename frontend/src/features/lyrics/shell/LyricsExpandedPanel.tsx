@@ -25,12 +25,12 @@ const LyricsExpandedPanel = ({
     const coverUrl = getPrimaryImageUrl(track.id, { width: 800, height: 800 });
 
     return (
-        <div className="relative flex min-h-[calc(70vh-7rem)] flex-col overflow-hidden animate-in fade-in duration-300">
+        <div className="relative flex h-[calc(70vh-7rem)] flex-col overflow-hidden animate-in fade-in duration-300">
             <div
-                className="pointer-events-none absolute inset-0 scale-110 bg-cover bg-center opacity-15 blur-3xl"
+                className="pointer-events-none absolute inset-0 bg-cover bg-center opacity-20 blur-2xl"
                 style={{ backgroundImage: `url(${coverUrl})` }}
             />
-            <div className="relative flex shrink-0 items-center justify-between border-b border-border/50 px-4 py-2">
+            <div className="relative flex shrink-0 items-center gap-2 border-b border-border/50 px-3 py-2">
                 <div className="min-w-0 flex-1 text-center">
                     <p className="truncate text-sm font-medium">{track.title}</p>
                     <p className="truncate text-xs text-muted-foreground">{track.artist}</p>
@@ -38,9 +38,10 @@ const LyricsExpandedPanel = ({
                 <Button
                     variant="ghost"
                     size="icon"
-                    className="absolute right-2 shrink-0"
+                    className="shrink-0"
                     onClick={onClose}
                     aria-label={t('hideLyrics')}
+                    title={t('hideLyrics')}
                 >
                     <ChevronDown />
                 </Button>
