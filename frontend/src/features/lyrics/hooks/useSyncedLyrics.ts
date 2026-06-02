@@ -61,7 +61,8 @@ export function useSyncedLyrics({
                 activeLine.getBoundingClientRect().top -
                 container.getBoundingClientRect().top +
                 container.scrollTop;
-            const targetScrollTop = lineTop - container.clientHeight / 2 + activeLine.clientHeight / 2;
+            const targetScrollTop =
+                lineTop - container.clientHeight / 2 + activeLine.clientHeight / 2;
 
             isProgrammaticScrollRef.current = true;
             container.scrollTo({
@@ -72,7 +73,7 @@ export function useSyncedLyrics({
                 isProgrammaticScrollRef.current = false;
             }, 100);
         },
-        [activeIndex, containerRef],
+        [activeIndex, containerRef]
     );
 
     useEffect(() => {

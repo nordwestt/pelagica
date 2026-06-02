@@ -12,7 +12,13 @@ interface SyncedLinesProps {
     enabled?: boolean;
 }
 
-const SyncedLines = ({ lines, currentTime, offset, onLineClick, enabled = true }: SyncedLinesProps) => {
+const SyncedLines = ({
+    lines,
+    currentTime,
+    offset,
+    onLineClick,
+    enabled = true,
+}: SyncedLinesProps) => {
     const {
         activeIndex,
         containerRef,

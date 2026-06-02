@@ -74,17 +74,17 @@ const MusicPlayerBar = () => {
                 play();
             }
         },
-        [isPlaying, play, seek],
+        [isPlaying, play, seek]
     );
     const toggleDesktopLyrics = useCallback(() => {
         setLyricsOpenTrackId((prev) =>
-            prev === currentTrack?.id ? null : (currentTrack?.id ?? null),
+            prev === currentTrack?.id ? null : (currentTrack?.id ?? null)
         );
     }, [currentTrack?.id]);
 
     const toggleMobileLyrics = useCallback(() => {
         setInlineLyricsTrackId((prev) =>
-            prev === currentTrack?.id ? null : (currentTrack?.id ?? null),
+            prev === currentTrack?.id ? null : (currentTrack?.id ?? null)
         );
     }, [currentTrack?.id]);
 
@@ -371,7 +371,7 @@ const MusicPlayerBar = () => {
                             'absolute bottom-full left-1/2 -translate-x-1/2 overflow-hidden',
                             'transition-[max-height] duration-500 ease-[cubic-bezier(0.34,1.56,0.64,1)]',
                             lyricsPanelWidthClass,
-                            isLyricsOpen ? 'max-h-[calc(70vh)]' : 'max-h-0',
+                            isLyricsOpen ? 'max-h-[calc(70vh)]' : 'max-h-0'
                         )}
                     >
                         <div className="overflow-hidden rounded-t-lg border border-sidebar-border bg-sidebar/90 shadow-sm backdrop-blur-lg">

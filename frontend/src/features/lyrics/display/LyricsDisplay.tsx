@@ -9,7 +9,12 @@ interface LyricsDisplayProps {
     enabled?: boolean;
 }
 
-const LyricsDisplay = ({ lyrics, currentTime, onLineClick, enabled = true }: LyricsDisplayProps) => {
+const LyricsDisplay = ({
+    lyrics,
+    currentTime,
+    onLineClick,
+    enabled = true,
+}: LyricsDisplayProps) => {
     if (lyrics.isSynced) {
         return (
             <SyncedLines

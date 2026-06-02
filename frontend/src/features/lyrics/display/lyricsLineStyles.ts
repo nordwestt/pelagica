@@ -22,7 +22,7 @@ export function getLineClassName(state: LyricLineState): string {
         'w-full transition-all duration-300 whitespace-pre-wrap',
         state === 'active' && 'text-xl font-semibold text-foreground scale-[1.02]',
         state === 'past' && 'text-base text-muted-foreground/45',
-        state === 'future' && 'text-base text-muted-foreground/75',
+        state === 'future' && 'text-base text-muted-foreground/75'
     );
 }
 

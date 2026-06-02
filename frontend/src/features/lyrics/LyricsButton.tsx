@@ -11,7 +11,12 @@ interface LyricsButtonProps {
     className?: string;
 }
 
-const LyricsButton = ({ active = false, loading = false, onClick, className }: LyricsButtonProps) => {
+const LyricsButton = ({
+    active = false,
+    loading = false,
+    onClick,
+    className,
+}: LyricsButtonProps) => {
     const { t } = useTranslation('player');
 
     const label = loading ? t('loadingLyrics') : active ? t('hideLyrics') : t('showLyrics');
@@ -23,7 +28,7 @@ const LyricsButton = ({ active = false, loading = false, onClick, className }: L
             className={cn(
                 'cursor-pointer',
                 active ? 'text-primary' : 'text-muted-foreground',
-                className,
+                className
             )}
             onClick={onClick}
             disabled={loading}
