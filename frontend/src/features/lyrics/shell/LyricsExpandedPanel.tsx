@@ -12,6 +12,7 @@ interface LyricsExpandedPanelProps {
     currentTime: number;
     onLineClick: (startTicks: number) => void;
     onClose: () => void;
+    enabled?: boolean;
 }
 
 const LyricsExpandedPanel = ({
@@ -20,6 +21,7 @@ const LyricsExpandedPanel = ({
     currentTime,
     onLineClick,
     onClose,
+    enabled = true,
 }: LyricsExpandedPanelProps) => {
     const { t } = useTranslation('player');
     const coverUrl = getPrimaryImageUrl(track.id, { width: 800, height: 800 });
@@ -51,6 +53,7 @@ const LyricsExpandedPanel = ({
                     lyrics={lyrics}
                     currentTime={currentTime}
                     onLineClick={onLineClick}
+                    enabled={enabled}
                 />
             </div>
         </div>

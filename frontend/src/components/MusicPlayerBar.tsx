@@ -367,6 +367,7 @@ const MusicPlayerBar = () => {
                         <div className="overflow-hidden rounded-t-lg border border-sidebar-border bg-sidebar/90 shadow-sm backdrop-blur-lg">
                             <LyricsExpandedPanel
                                 {...lyricsPanelProps}
+                                enabled={isLyricsOpen}
                                 onClose={() => {
                                     setIsLyricsOpen(false);
                                 }}

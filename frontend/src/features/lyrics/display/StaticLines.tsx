@@ -6,11 +6,12 @@ import { staticLineClassName } from './lyricsLineStyles';
 
 interface StaticLinesProps {
     lines: LyricLine[];
+    enabled?: boolean;
 }
 
-const StaticLines = ({ lines }: StaticLinesProps) => {
+const StaticLines = ({ lines, enabled = true }: StaticLinesProps) => {
     const { t } = useTranslation('player');
-    const { containerRef, edgePadding } = useLyricsEdgePadding();
+    const { containerRef, edgePadding } = useLyricsEdgePadding(enabled);
 
     return (
         <LyricsScrollArea containerRef={containerRef} edgePadding={edgePadding}>

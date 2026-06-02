@@ -9,9 +9,10 @@ interface SyncedLinesProps {
     currentTime: number;
     offset?: number | null;
     onLineClick: (startTicks: number) => void;
+    enabled?: boolean;
 }
 
-const SyncedLines = ({ lines, currentTime, offset, onLineClick }: SyncedLinesProps) => {
+const SyncedLines = ({ lines, currentTime, offset, onLineClick, enabled = true }: SyncedLinesProps) => {
     const {
         activeIndex,
         containerRef,
@@ -24,7 +25,7 @@ const SyncedLines = ({ lines, currentTime, offset, onLineClick }: SyncedLinesPro
         lines,
         currentTime,
         offset,
-        enabled: true,
+        enabled,
     });
 
     return (

@@ -43,6 +43,13 @@ export function useSyncedLyrics({
 
     useEffect(() => clearGraceTimer, [clearGraceTimer]);
 
+    useEffect(() => {
+        if (!enabled) {
+            clearGraceTimer();
+            setAutoScrollEnabled(true);
+        }
+    }, [clearGraceTimer, enabled]);
+
     const scrollActiveLineIntoView = useCallback(
         (behavior: ScrollBehavior = 'smooth') => {
             const container = containerRef.current;
