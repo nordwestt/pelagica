@@ -1,4 +1,4 @@
-import { useNavigate, useParams } from 'react-router';
+import { Navigate, useParams } from 'react-router';
 import Page from '../Page';
 import { useItem } from '@/hooks/api/useItem';
 import MoviePage from './MoviePage';
@@ -104,7 +104,6 @@ const READIRECT_ITEM_TYPES: Partial<Record<BaseItemKind, string>> = {
 };
 
 const ItemPage = () => {
-    const navigate = useNavigate();
     const { t } = useTranslation('item');
     const params = useParams<{ itemId: string }>();
     const itemId = params.itemId;
@@ -112,10 +111,11 @@ const ItemPage = () => {
     const { config, loading: configLoading } = useConfig();
     const { data: item, isLoading, error } = useItem(itemId, true, getUserId() || undefined);
 
-    if (item && item.Type && READIRECT_ITEM_TYPES[item.Type]) {
-        navigate(READIRECT_ITEM_TYPES[item.Type] + '/' + item.Id);
-        return null;
-    }
+    const redirectPath =
+        item?.Type && READIRECT_ITEM_TYPES[item.Type]
+            ? `${READIRECT_ITEM_TYPES[item.Type]}/${item.Id}`
+            : null;
+    if (redirectPath) return <Navigate to={redirectPath} replace />;
 
     const isFullPageItem = item && FULL_PAGE_ITEM_TYPES.includes(item.Type as BaseItemKind);
 
