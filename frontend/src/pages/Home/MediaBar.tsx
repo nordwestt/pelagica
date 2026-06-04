@@ -106,7 +106,7 @@ const MediaBar = ({
             {title && <h2 className="text-2xl font-bold mb-3 pl-12 pt-4">{title}</h2>}
 
             <div
-                className="absolute inset-x-0 top-0 overflow-hidden rounded-b-xl -z-10 pointer-events-none"
+                className="absolute inset-x-0 top-0 overflow-hidden rounded-xl rounded-tr-none -z-10 pointer-events-none"
                 style={{ height: 'calc(100% + 10rem)' }}
             >
                 {mediabarItems?.map((item, i) => (
