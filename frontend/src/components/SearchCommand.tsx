@@ -19,17 +19,18 @@ import { Badge } from './ui/badge';
 
 export const SearchCommand = () => {
     const { t } = useTranslation('search');
-    const { isOpen, closeSearch } = useSearch();
+    const { isOpen, searchMode, closeSearch } = useSearch();
     const navigate = useNavigate();
     const [query, setQuery] = useState('');
     const [debouncedQuery, setDebouncedQuery] = useState('');
     const [, startTransition] = useTransition();
+    const itemTypes = searchMode === 'music' ? ['MusicAlbum', 'Audio'] : ['Movie', 'Series'];
     const {
         data: results,
         isLoading,
         error,
     } = useSearchItems(debouncedQuery, {
-        itemTypes: ['Movie', 'Series'],
+        itemTypes,
         limit: 15,
     });
 
@@ -114,7 +115,9 @@ export const SearchCommand = () => {
                                 }}
                             >
                                 <div className="flex items-start gap-3 w-full">
-                                    <div className="relative w-13 h-20 overflow-hidden rounded-md shrink-0">
+                                    <div className={`relative overflow-hidden rounded-md shrink-0 ${
+                                        item.Type === 'MusicAlbum' || item.Type === 'Audio' ? 'w-13 h-13' : 'w-13 h-20'
+                                    }`}>
                                         <img
                                             src={`${posterUrls[item.Id!]}?maxWidth=96&maxHeight=144&quality=85`}
                                             alt={item.Name || ''}
@@ -134,17 +137,33 @@ export const SearchCommand = () => {
                                             </Badge>
                                         </div>
                                         <div className="flex items-center gap-3 mt-1 text-xs text-muted-foreground">
-                                            {item.ProductionYear && (
-                                                <div className="flex items-center gap-1">
-                                                    <Calendar className="h-3! w-3!" />
-                                                    <span>{item.ProductionYear}</span>
-                                                </div>
-                                            )}
-                                            {item.CommunityRating && (
-                                                <div className="flex items-center gap-1">
-                                                    <Star className="h-3! w-3!" />
-                                                    <span>{item.CommunityRating.toFixed(1)}</span>
-                                                </div>
+                                            {(item.Type === 'MusicAlbum' || item.Type === 'Audio') ? (
+                                                <>
+                                                    {item.Artists && item.Artists.length > 0 && (
+                                                        <span className="line-clamp-1">{item.Artists.join(', ')}</span>
+                                                    )}
+                                                    {item.ProductionYear && (
+                                                        <div className="flex items-center gap-1">
+                                                            <Calendar className="h-3! w-3!" />
+                                                            <span>{item.ProductionYear}</span>
+                                                        </div>
+                                                    )}
+                                                </>
+                                            ) : (
+                                                <>
+                                                    {item.ProductionYear && (
+                                                        <div className="flex items-center gap-1">
+                                                            <Calendar className="h-3! w-3!" />
+                                                            <span>{item.ProductionYear}</span>
+                                                        </div>
+                                                    )}
+                                                    {item.CommunityRating && (
+                                                        <div className="flex items-center gap-1">
+                                                            <Star className="h-3! w-3!" />
+                                                            <span>{item.CommunityRating.toFixed(1)}</span>
+                                                        </div>
+                                                    )}
+                                                </>
                                             )}
                                         </div>
                                         {item.Overview && (
