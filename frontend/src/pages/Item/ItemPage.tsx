@@ -99,7 +99,7 @@ ItemPageSkeleton.displayName = 'ItemPageSkeleton';
 
 const FULL_PAGE_ITEM_TYPES: BaseItemKind[] = ['Movie', 'Series', 'Episode', 'Season', 'BoxSet'];
 
-const READIRECT_ITEM_TYPES: Partial<Record<BaseItemKind, string>> = {
+const REDIRECT_ITEM_TYPES: Partial<Record<BaseItemKind, string>> = {
     Person: '/person',
 };
 
@@ -112,8 +112,8 @@ const ItemPage = () => {
     const { data: item, isLoading, error } = useItem(itemId, true, getUserId() || undefined);
 
     const redirectPath =
-        item?.Type && READIRECT_ITEM_TYPES[item.Type]
-            ? `${READIRECT_ITEM_TYPES[item.Type]}/${item.Id}`
+        item?.Type && REDIRECT_ITEM_TYPES[item.Type]
+            ? `${REDIRECT_ITEM_TYPES[item.Type]}/${item.Id}`
             : null;
     if (redirectPath) return <Navigate to={redirectPath} replace />;
 
