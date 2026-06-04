@@ -11,7 +11,7 @@ import {
     Star,
     ImageOff,
 } from 'lucide-react';
-import { type ReactNode, useEffect, useState } from 'react';
+import { type ReactNode, useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link, useSearchParams } from 'react-router';
 import ItemPagination from '@/components/ItemPagination';
