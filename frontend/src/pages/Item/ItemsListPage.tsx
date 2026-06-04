@@ -11,7 +11,7 @@ import {
     Star,
     ImageOff,
 } from 'lucide-react';
-import { type ReactNode, useEffect, useRef, useState } from 'react';
+import { type ReactNode, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link, useSearchParams } from 'react-router';
 import ItemPagination from '@/components/ItemPagination';
@@ -79,11 +79,7 @@ const ItemDisplay = ({ item, aspectClass, overlay }: ItemDisplayProps) => {
                     <>
                         <img
                             key={item.Id}
-                            src={getPrimaryImageUrl(
-                                item.Id!,
-                                { width: 416, height: 640 },
-                                item.ImageTags?.Primary
-                            )}
+                            src={getPrimaryImageUrl(item.Id!, undefined, item.ImageTags?.Primary)}
                             alt={item.Name || t('library:no_title')}
                             className="w-full h-full object-cover rounded-md group-hover:opacity-75 transition-all group-hover:scale-105 z-10"
                             loading="lazy"
@@ -213,7 +209,7 @@ const ItemsListPage = ({
         'grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-7 2xl:grid-cols-9';
 
     return (
-        <div ref={pageRef}>
+        <div>
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-4">
                 <h2 className="text-2xl font-bold">{listTitle ?? item.Name}</h2>
                 <ButtonGroup>

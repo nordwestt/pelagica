@@ -1,4 +1,3 @@
-import AppSidebar from '@/components/AppSidebar';
 import { Button } from '@/components/ui/button';
 import {
     SIDEBAR_WIDTH,
@@ -11,13 +10,9 @@ import {
 import { type CSSProperties, type PropsWithChildren, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router';
 import { useCurrentUser } from '@/hooks/api/useCurrentUser';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { getServerUrl } from '@/utils/localstorageCredentials';
 import { PageBackgroundProvider } from '@/context/PageBackgroundProvider';
 import { usePageBackground } from '@/hooks/usePageBackground';
 import MusicPlayerBar from '@/components/MusicPlayerBar';
-import { useTheme } from '@/components/theme-provider';
-import { getEffectiveTheme } from '@/utils/effectiveTheme';
 import FullPageLoader from '@/components/FullPageLoader';
 import { logout } from '@/api/logout';
 import { getApi } from '@/api/getApi';
@@ -25,6 +20,8 @@ import FullPageError from '@/components/FullPageError';
 import { getSidebarState, saveSidebarState } from '../utils/localstorageSidebar';
 import { useSidebarBrowser } from '@/context/SidebarBrowserContext';
 import { useIsMobile } from '@/hooks/use-mobile';
+import TopBar from '@/components/TopBar';
+import { cn } from '../lib/utils';
 
 interface PageProps {
     title?: string;
@@ -32,24 +29,14 @@ interface PageProps {
     containerClassName?: string;
     requiresAuth?: boolean;
     requireAdmin?: boolean;
-    sidebar?: boolean;
     breadcrumbs?: React.ReactNode;
     bgItem?: React.ReactNode;
     showPlayerBar?: boolean;
+    overlayHeader?: boolean;
+    pagePadding?: boolean;
 }
 
-const isLoggedIn = () => {
-    return Boolean(localStorage.getItem('jf_token'));
-};
-
-function serverUrlToDomain(url: string) {
-    try {
-        const parsedUrl = new URL(url);
-        return parsedUrl.hostname;
-    } catch {
-        return url;
-    }
-}
+const isLoggedIn = () => Boolean(localStorage.getItem('jf_token'));
 
 const PageContent = ({
     children,
@@ -58,7 +45,8 @@ const PageContent = ({
     containerClassName,
     requiresAuth = false,
     requireAdmin = false,
-    sidebar = true,
+    overlayHeader = false,
+    pagePadding = true,
     breadcrumbs,
     bgItem,
     showPlayerBar = true,
@@ -68,10 +56,6 @@ const PageContent = ({
     const { background } = usePageBackground();
     const { browseMode } = useSidebarBrowser();
     const isMobile = useIsMobile();
-    const serverUrl = getServerUrl();
-    const serverDomain = serverUrl ? serverUrlToDomain(serverUrl) : null;
-    const { theme } = useTheme();
-    const effectiveTheme = getEffectiveTheme(theme);
     const [showLoader, setShowLoader] = useState(true);
     const [sidebarOpen, setSidebarOpen] = useState<boolean | null>(() => getSidebarState());
     const [browseTransitionActive, setBrowseTransitionActive] = useState(browseMode);
@@ -103,11 +87,7 @@ const PageContent = ({
 
     useEffect(() => {
         if (!isLoading) return;
-
-        const t = setTimeout(() => {
-            setShowLoader(true);
-        }, 600);
-
+        const t = setTimeout(() => setShowLoader(true), 600);
         return () => {
             clearTimeout(t);
             setShowLoader(false);
@@ -136,26 +116,18 @@ const PageContent = ({
         );
 
     if (requiresAuth && !isLoggedIn()) return null;
-
     if (requiresAuth && !user) return null;
 
-    if (requireAdmin && user && !user.Policy?.IsAdministrator) {
+    if (requireAdmin && user && !user.Policy?.IsAdministrator)
         return (
             <FullPageError
                 title="Access Denied"
                 message="You do not have the necessary permissions to view this page."
                 content={
-                    <Button
-                        onClick={() => {
-                            navigate('/', { replace: true });
-                        }}
-                    >
-                        Return to home
-                    </Button>
+                    <Button onClick={() => navigate('/', { replace: true })}>Return to home</Button>
                 }
             />
         );
-    }
 
     const sidebarWidth = browseMode
         ? isMobile
@@ -168,6 +140,7 @@ const PageContent = ({
     const useBrowseTransition = browseMode || browseTransitionActive;
 
     return (
+
         <SidebarProvider
             className={`relative min-h-dvh h-dvh ${containerClassName ?? ''}`}
             style={
@@ -186,50 +159,26 @@ const PageContent = ({
             }}
         >
             {background || bgItem}
-            {sidebar && <AppSidebar />}
-            <div className="relative w-full flex flex-col overflow-x-hidden overflow-y-auto h-dvh md:h-[calc(100dvh-2rem)] px-4 my-0 md:my-4 z-5 [&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:bg-muted-foreground [&::-webkit-scrollbar-thumb]:rounded-full">
-                {sidebar && breadcrumbs ? (
-                    <div className="flex items-center gap-2 mb-4">
-                        <SidebarTrigger />
-                        {breadcrumbs}
-                    </div>
-                ) : (
-                    <div className="flex items-center justify-between py-4 md:hidden">
-                        <div className="flex items-center gap-2">
-                            <Avatar className="h-8 w-8 p-1 rounded-lg">
-                                <AvatarImage
-                                    src={effectiveTheme === 'dark' ? '/logo.svg' : '/logo-dark.svg'}
-                                    alt={'Pelagica logo'}
-                                />
-                                <AvatarFallback className="rounded-lg">{'PE'}</AvatarFallback>
-                            </Avatar>
-                            <div className="grid flex-1 text-left text-sm leading-tight">
-                                <span className="truncate font-medium">Pelagica</span>
-                                {serverDomain && (
-                                    <span className="truncate text-xs font-normal text-muted-foreground">
-                                        {serverDomain}
-                                    </span>
-                                )}
-                            </div>
-                        </div>
-                        <Button asChild size={'icon'} variant={'ghost'}>
-                            <SidebarTrigger />
-                        </Button>
-                    </div>
+            <TopBar overlay={overlayHeader} />
+            <div
+                className={cn(
+                    'relative flex flex-col flex-1 overflow-x-hidden overflow-y-auto z-5 [&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:bg-muted-foreground [&::-webkit-scrollbar-thumb]:rounded-full',
+                    pagePadding && 'py-4 px-4 sm:px-12',
+                    !overlayHeader && 'pt-18' // Topbar has height of 14 + 4 (padding) = 18
                 )}
-                <main className={`w-full ${className ?? ''}`}>{children}</main>
-                {showPlayerBar && <MusicPlayerBar />}
+            >
+                {breadcrumbs && <div className="flex items-center gap-2 mb-4">{breadcrumbs}</div>}
+                <main className={`w-full flex-1 ${className ?? ''}`}>{children}</main>
             </div>
+            {showPlayerBar && <MusicPlayerBar />}
         </SidebarProvider>
     );
 };
 
-const Page = (props: PropsWithChildren<PageProps>) => {
-    return (
-        <PageBackgroundProvider>
-            <PageContent {...props} />
-        </PageBackgroundProvider>
-    );
-};
+const Page = (props: PropsWithChildren<PageProps>) => (
+    <PageBackgroundProvider>
+        <PageContent {...props} />
+    </PageBackgroundProvider>
+);
 
 export default Page;

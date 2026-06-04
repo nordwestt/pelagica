@@ -9,8 +9,8 @@ interface MoreLikeThisRowProps {
     title?: React.ReactNode;
     itemId: string;
     isLoading?: boolean;
-    /** Use square tiles (e.g. similar music artists or albums). */
-    squarePosters?: boolean;
+    posterShape?: 'portrait' | 'square';
+    itemType?: string;
 }
 
 const portraitSkeletonItems = Array.from({ length: 5 }, (_, index) => (
@@ -30,20 +30,21 @@ const squareSkeletonItems = Array.from({ length: 5 }, (_, index) => (
 ));
 
 const MoreLikeThisRow: React.FC<MoreLikeThisRowProps> = memo(
-    ({ title, itemId, isLoading, squarePosters = false }) => {
+    ({ title, itemId, isLoading, posterShape = 'portrait', itemType }) => {
         const { data: similarItems, isLoading: isLoadingSimilarItems } = useSimilarItems(
             itemId,
             12
         );
-        const skeletonItems = squarePosters ? squareSkeletonItems : portraitSkeletonItems;
+        const skeletonItems =
+            posterShape === 'square' ? squareSkeletonItems : portraitSkeletonItems;
 
         const displayItems = useMemo(() => {
             if (!similarItems) return [];
-            if (squarePosters) {
-                return similarItems.filter((item) => item.Type === 'MusicArtist');
+            if (itemType) {
+                return similarItems.filter((item) => item.Type === itemType);
             }
             return similarItems;
-        }, [similarItems, squarePosters]);
+        }, [similarItems, itemType]);
 
         const itemElements = useMemo(() => {
             return displayItems.map((item) => (

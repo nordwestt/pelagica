@@ -36,6 +36,7 @@ const MusicArtistPage = ({ item, config }: MusicArtistPageProps) => {
     const { t } = useTranslation('item');
     const { loadQueue } = useMusicPlayback();
     const [imageError, setImageError] = useState(false);
+    const [isOverviewExpanded, setIsOverviewExpanded] = useState(false);
 
     const { data: albumCount, isLoading: loadingAlbumCount } = useArtistAlbumCount(item.Id);
     const { data: tracks, isLoading: loadingTracks } = useArtistTracks(item.Id);
@@ -62,7 +63,7 @@ const MusicArtistPage = ({ item, config }: MusicArtistPageProps) => {
         if (!tracks?.length) return;
 
         loadQueue(
-            tracks.map((track) => ({
+            tracks.map((track: BaseItemDto) => ({
                 id: track.Id || '',
                 title: track.Name || '',
                 artist: item.Name || track.ArtistItems?.[0]?.Name || 'Unknown',
@@ -145,7 +146,7 @@ const MusicArtistPage = ({ item, config }: MusicArtistPageProps) => {
 
                     <div
                         className={cn(
-                            'flex min-h-0 min-w-0 flex-1 flex-col p-6 text-center md:h-full md:p-8 md:text-left',
+                            'flex min-h-0 min-w-0 flex-1 flex-col p-6 text-center md:h-full md:p-8 md:text-left !pb-2',
                             onPalette && 'text-white'
                         )}
                     >
@@ -174,7 +175,6 @@ const MusicArtistPage = ({ item, config }: MusicArtistPageProps) => {
                                     <Button
                                         size="default"
                                         className={cn(
-                                            'rounded-full px-4 sm:px-6',
                                             onPalette && 'bg-white text-black hover:bg-white/90'
                                         )}
                                         onClick={handlePlayArtist}
@@ -236,16 +236,41 @@ const MusicArtistPage = ({ item, config }: MusicArtistPageProps) => {
                         </div>
 
                         {item.Overview && (
-                            <div className="mt-4 min-h-0 flex-1 md:overflow-y-auto md:overscroll-contain md:pr-2 [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-white/30">
-                                <p
+                            <>
+                                <div
                                     className={cn(
-                                        'text-sm leading-relaxed sm:text-base md:text-left',
-                                        onPalette ? 'text-white/85' : 'text-muted-foreground'
+                                        'mt-4 pb-6 min-h-0 flex-1 md:overflow-y-auto md:overscroll-contain md:pr-2 [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-white/30',
+                                        !isOverviewExpanded && 'line-clamp-3 md:line-clamp-none'
                                     )}
+                                    style={{
+                                        maskImage: !isOverviewExpanded
+                                            ? 'linear-gradient(to bottom, black 85%, transparent 100%)'
+                                            : undefined,
+                                        WebkitMaskImage: !isOverviewExpanded
+                                            ? 'linear-gradient(to bottom, black 85%, transparent 100%)'
+                                            : undefined,
+                                    }}
                                 >
-                                    {item.Overview}
-                                </p>
-                            </div>
+                                    <p
+                                        className={cn(
+                                            'text-sm leading-relaxed sm:text-base md:text-left',
+                                            onPalette ? 'text-white/85' : 'text-muted-foreground'
+                                        )}
+                                    >
+                                        {item.Overview}
+                                    </p>
+                                </div>
+                                {!isOverviewExpanded && (
+                                    <Button
+                                        variant="ghost"
+                                        size="sm"
+                                        onClick={() => setIsOverviewExpanded(true)}
+                                        className="md:hidden"
+                                    >
+                                        {t('more')}
+                                    </Button>
+                                )}
+                            </>
                         )}
                     </div>
                 </div>
@@ -263,7 +288,8 @@ const MusicArtistPage = ({ item, config }: MusicArtistPageProps) => {
             <MoreLikeThisRow
                 title={<h3 className="text-3xl font-bold">{t('more_like_this')}</h3>}
                 itemId={item.Id || ''}
-                squarePosters
+                posterShape="square"
+                itemType="MusicArtist"
             />
         </div>
     );
