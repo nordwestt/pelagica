@@ -529,10 +529,12 @@ const UserMenu = () => {
 
 const TopBar = ({
     overlay = false,
+    scrolled = false,
     showSidebarTrigger = false,
     onSidebarToggle,
 }: {
     overlay?: boolean;
+    scrolled?: boolean;
     showSidebarTrigger?: boolean;
     onSidebarToggle?: () => void;
 }) => {
@@ -542,19 +544,6 @@ const TopBar = ({
     const { theme } = useTheme();
     const effectiveTheme = getEffectiveTheme(theme);
     const [mobileOpen, setMobileOpen] = useState(false);
-    const [scrolled, setScrolled] = useState(false);
-
-    useEffect(() => {
-        const handleScroll = () => {
-            setScrolled(window.scrollY > 20);
-        };
-
-        handleScroll();
-
-        window.addEventListener('scroll', handleScroll);
-
-        return () => window.removeEventListener('scroll', handleScroll);
-    }, []);
 
     const defaultLogo = effectiveTheme === 'dark' ? '/logo.svg' : '/logo-dark.svg';
     const configuredLogo =

@@ -53,6 +53,7 @@ const PageContent = ({
     const { background } = usePageBackground();
     const [showLoader, setShowLoader] = useState(true);
     const [sidebarOpen, setSidebarOpen] = useState<boolean | null>(() => getSidebarState());
+    const [pageScrolled, setPageScrolled] = useState(false);
 
     useEffect(() => {
         if (title) document.title = title;
@@ -123,6 +124,7 @@ const PageContent = ({
             {background || bgItem}
             <TopBar
                 overlay={overlayHeader}
+                scrolled={pageScrolled}
                 showSidebarTrigger={showSidebar}
                 onSidebarToggle={() => handleSidebarOpenChange(!(sidebarOpen ?? false))}
             />
@@ -139,6 +141,7 @@ const PageContent = ({
                         pagePadding && 'py-4 px-4 sm:px-12',
                         !overlayHeader && 'pt-18' // Topbar has height of 14 + 4 (padding) = 18
                     )}
+                    onScroll={(event) => setPageScrolled(event.currentTarget.scrollTop > 20)}
                 >
                     {breadcrumbs && (
                         <div className="flex items-center gap-2 mb-4">{breadcrumbs}</div>
