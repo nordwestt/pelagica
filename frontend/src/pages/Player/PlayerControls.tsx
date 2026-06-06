@@ -145,6 +145,10 @@ const PlayerControls = ({
     const [container, setContainer] = useState<HTMLElement | null>(null);
     const { data: session } = useSession(item.Id, showStats);
 
+    const handleBack = () => {
+        navigate(-1);
+    };
+
     useEffect(() => {
         setContainer(containerRef.current);
     }, [containerRef]);
@@ -425,10 +429,8 @@ const PlayerControls = ({
                 }}
                 onMouseMove={handleMouseMove}
             >
-                <Button variant="ghost" asChild>
-                    <Link to={`/item/${item.Id}`}>
-                        <ArrowLeft />
-                    </Link>
+                <Button variant="ghost" onClick={handleBack}>
+                    <ArrowLeft />
                 </Button>
                 <h1>{title}</h1>
             </div>

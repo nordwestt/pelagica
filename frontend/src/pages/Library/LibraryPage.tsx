@@ -247,7 +247,7 @@ const LibraryPage = () => {
                 SUPPORTED_LIBRARY_COLLECTION_TYPES.includes(library.CollectionType!)
             ) ?? []
         );
-    }, [libraries]);
+    }, [libraries?.Items]);
 
     const activeLibraryId = useMemo(() => {
         if (!libraryItems.length) return libraryIdFromUrl;
