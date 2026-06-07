@@ -48,6 +48,15 @@ const ItemMetadataBadges = ({ item }: ItemMetadataBadgesProps) => {
         <ShowMoreButton rowKey={rowKey} total={total} expanded={expanded} onToggle={toggle} t={t} />
     );
 
+    if (
+        writers.length === 0 &&
+        directors.length === 0 &&
+        genres.length === 0 &&
+        studios.length === 0
+    ) {
+        return null;
+    }
+
     return (
         <div className="grid grid-cols-[auto_1fr] gap-x-4 gap-y-4 border-t border-black/10 dark:border-white/10 pt-6 w-full max-w-4xl items-start">
             {genres.length > 0 && (

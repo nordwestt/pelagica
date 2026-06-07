@@ -27,6 +27,8 @@ const Overview = ({ text, lines = 3, className }: OverviewProps) => {
         if (el && !expanded) setIsClamped(el.scrollHeight > el.clientHeight);
     }, [text, lines, expanded]);
 
+    if (text.trim().length === 0) return null;
+
     return (
         <div className="max-w-3xl mt-2">
             <p
