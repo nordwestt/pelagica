@@ -130,7 +130,7 @@ const SeriesPage = ({ item, config }: SeriesPageProps) => {
                                     asChild
                                 >
                                     <Link to={`/play/${episodeToContinue.Id}`}>
-                                        <Play className="mr-2 h-4 w-4 fill-current" />
+                                        <Play />
                                         {episodeToContinue.UserData?.PlaybackPositionTicks
                                             ? t('continue_episode', {
                                                   season: episodeToContinue.ParentIndexNumber,
@@ -144,7 +144,7 @@ const SeriesPage = ({ item, config }: SeriesPageProps) => {
                                 </Button>
                             ) : (
                                 <Button className="w-fit" disabled>
-                                    <Play className="mr-2 h-4 w-4" />
+                                    <Play />
                                     {t('loading')}
                                 </Button>
                             )}
