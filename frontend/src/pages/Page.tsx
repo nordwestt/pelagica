@@ -137,10 +137,7 @@ const PageContent = ({
         >
             <DefaultPageBackground />
             {background || bgItem}
-            <TopBar
-                overlay={overlayHeader}
-                scrolled={pageScrolled}
-            />
+            <TopBar overlay={overlayHeader} scrolled={pageScrolled} />
             <div className="flex min-h-0 w-full flex-1 flex-row">
                 {showSidebar && (
                     <PageSidebar
