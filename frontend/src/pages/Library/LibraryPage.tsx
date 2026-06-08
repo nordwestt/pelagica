@@ -22,6 +22,7 @@ import {
     CaseSensitive,
     Clock,
     FolderOpen,
+    PanelLeftIcon,
     Star,
 } from 'lucide-react';
 import JellyfinLibraryIcon from '@/components/JellyfinLibraryIcon';
@@ -34,6 +35,7 @@ import {
 } from '@/components/ui/select';
 import type { BaseItemDto, BaseItemKind, CollectionType, ItemSortBy, SortOrder } from '@jellyfin/sdk/lib/generated-client/models';
 import { ButtonGroup } from '@/components/ui/button-group';
+import { Button } from '@/components/ui/button';
 import LibraryItem from './LibraryItem';
 import HomeVideoGrid, { TARGET_ROW_HEIGHT } from './HomeVideoGrid';
 import { SUPPORTED_LIBRARY_COLLECTION_TYPES } from '@/utils/supportedLibraryCollectionTypes';
@@ -294,16 +296,32 @@ const LibraryPage = () => {
 
     return (
         <Page title={t('title')} requiresAuth className="flex-1">
-            <Tabs value={activeLibraryId} onValueChange={handleLibraryChange} className="w-full">
+            {({ showSidebar, sidebarOpen, toggleSidebar }) => (
+                <Tabs value={activeLibraryId} onValueChange={handleLibraryChange} className="w-full">
                 <div className="flex flex-col sm:items-center sm:justify-between sm:flex-row gap-2">
-                    <TabsList className="max-w-full overflow-auto hidden sm:flex">
-                        {libraryItems?.map((library) => (
-                            <TabsTrigger key={library.Id} value={library.Id ?? ''}>
-                                <JellyfinLibraryIcon libraryType={library.CollectionType} />
-                                {library.Name}
-                            </TabsTrigger>
-                        ))}
-                    </TabsList>
+                    <div className="hidden min-w-0 items-center gap-2 sm:flex">
+                        {showSidebar && !sidebarOpen && (
+                            <Button
+                                variant="ghost"
+                                size="icon"
+                                className="hidden size-9 shrink-0 md:inline-flex"
+                                onClick={toggleSidebar}
+                                aria-label="Toggle sidebar"
+                                aria-pressed={sidebarOpen}
+                            >
+                                <PanelLeftIcon className="h-5 w-5" />
+                            </Button>
+                        )}
+
+                        <TabsList className="max-w-full overflow-auto">
+                            {libraryItems?.map((library) => (
+                                <TabsTrigger key={library.Id} value={library.Id ?? ''}>
+                                    <JellyfinLibraryIcon libraryType={library.CollectionType} />
+                                    {library.Name}
+                                </TabsTrigger>
+                            ))}
+                        </TabsList>
+                    </div>
 
                     <Select onValueChange={handleLibraryChange} value={activeLibraryId}>
                         <SelectTrigger size="sm" className="w-full sm:hidden">
@@ -366,24 +384,25 @@ const LibraryPage = () => {
                     </ButtonGroup>
                 </div>
 
-                {libraryItems?.map((library) => {
-                    if (!library.Id) return null;
+                    {libraryItems?.map((library) => {
+                        if (!library.Id) return null;
 
-                    return (
-                        <TabsContent key={library.Id} value={library.Id}>
-                            <LibraryContent
-                                key={`${library.Id}-${sortBy}-${sortOrder}`}
-                                libraryId={library.Id}
-                                sortBy={sortBy}
-                                sortOrder={sortOrder}
-                                page={page}
-                                onPageChange={handlePageChange}
-                                collectionType={library.CollectionType as CollectionType}
-                            />
-                        </TabsContent>
-                    );
-                })}
-            </Tabs>
+                        return (
+                            <TabsContent key={library.Id} value={library.Id}>
+                                <LibraryContent
+                                    key={`${library.Id}-${sortBy}-${sortOrder}`}
+                                    libraryId={library.Id}
+                                    sortBy={sortBy}
+                                    sortOrder={sortOrder}
+                                    page={page}
+                                    onPageChange={handlePageChange}
+                                    collectionType={library.CollectionType as CollectionType}
+                                />
+                            </TabsContent>
+                        );
+                    })}
+                </Tabs>
+            )}
         </Page>
     );
 };

@@ -1,5 +1,5 @@
 import { Button } from '@/components/ui/button';
-import { type PropsWithChildren, useEffect, useState } from 'react';
+import { type ReactNode, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router';
 import { useCurrentUser } from '@/hooks/api/useCurrentUser';
 import { PageBackgroundProvider } from '@/context/PageBackgroundProvider';
@@ -14,7 +14,15 @@ import TopBar from '@/components/TopBar';
 import { cn } from '../lib/utils';
 import PageSidebar from '../components/PageSidebar';
 
+type PageRenderContext = {
+    showSidebar: boolean;
+    sidebarOpen: boolean;
+    toggleSidebar: () => void;
+    setSidebarOpen: (open: boolean) => void;
+};
+
 interface PageProps {
+    children?: ReactNode | ((context: PageRenderContext) => ReactNode);
     title?: string;
     className?: string;
     containerClassName?: string;
@@ -47,7 +55,7 @@ const PageContent = ({
     breadcrumbs,
     bgItem,
     showPlayerBar = true,
-}: PropsWithChildren<PageProps>) => {
+}: PageProps) => {
     const navigate = useNavigate();
     const { isLoading, isError, data: user } = useCurrentUser();
     const { background } = usePageBackground();
@@ -116,6 +124,13 @@ const PageContent = ({
         saveSidebarState(open);
     };
 
+    const pageRenderContext: PageRenderContext = {
+        showSidebar,
+        sidebarOpen: sidebarOpen ?? false,
+        toggleSidebar: () => handleSidebarOpenChange(!(sidebarOpen ?? false)),
+        setSidebarOpen: handleSidebarOpenChange,
+    };
+
     return (
         <div
             className={`relative isolate flex min-h-dvh h-dvh w-full flex-col overflow-hidden bg-background ${containerClassName ?? ''}`}
@@ -125,8 +140,6 @@ const PageContent = ({
             <TopBar
                 overlay={overlayHeader}
                 scrolled={pageScrolled}
-                showSidebarTrigger={showSidebar}
-                onSidebarToggle={() => handleSidebarOpenChange(!(sidebarOpen ?? false))}
             />
             <div className="flex min-h-0 w-full flex-1 flex-row">
                 {showSidebar && (
@@ -146,7 +159,9 @@ const PageContent = ({
                     {breadcrumbs && (
                         <div className="flex items-center gap-2 mb-4">{breadcrumbs}</div>
                     )}
-                    <main className={`w-full flex-1 ${className ?? ''}`}>{children}</main>
+                    <main className={`w-full flex-1 ${className ?? ''}`}>
+                        {typeof children === 'function' ? children(pageRenderContext) : children}
+                    </main>
                 </div>
             </div>
             {showPlayerBar && <MusicPlayerBar />}
@@ -154,7 +169,7 @@ const PageContent = ({
     );
 };
 
-const Page = (props: PropsWithChildren<PageProps>) => (
+const Page = (props: PageProps) => (
     <PageBackgroundProvider>
         <PageContent {...props} />
     </PageBackgroundProvider>
