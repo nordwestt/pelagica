@@ -29,7 +29,7 @@ If you want to suggest new features or report bugs, please use the [GitHub Issue
 <table>
   <tr>
     <td>
-      <img src="./.github/assets/custom_sections.webp" />
+      <img src="./.github/assets/library.webp" />
     </td>
     <td>
       <img src="./.github/assets/series_page.webp" />
@@ -154,12 +154,12 @@ Pelagica supports multiple languages and depends on community contributions for 
 
 ### Prerequisites
 
-| Tool | Version |
-|------|---------|
-| [Go](https://go.dev/dl/) | 1.25+ |
-| [Node.js](https://nodejs.org/) | 24.16+ |
-| [pnpm](https://pnpm.io/installation) | latest |
-| [Task](https://taskfile.dev/installation/) | latest |
+| Tool                                       | Version |
+| ------------------------------------------ | ------- |
+| [Go](https://go.dev/dl/)                   | 1.25+   |
+| [Node.js](https://nodejs.org/)             | 24.16+  |
+| [pnpm](https://pnpm.io/installation)       | latest  |
+| [Task](https://taskfile.dev/installation/) | latest  |
 
 ### Running the dev environment
 
