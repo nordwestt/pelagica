@@ -14,6 +14,7 @@ import StatsConsentModal from './components/StatsConsentModal.tsx';
 import './index.css';
 import './theme.css';
 import './i18n.ts';
+import { ScrollToTop } from './components/ScrollToTop.tsx';
 
 const HomePage = lazy(() => import('./pages/Home/HomePage.tsx'));
 const LoginPage = lazy(() => import('./pages/Login/LoginPage.tsx'));
@@ -35,6 +36,7 @@ createRoot(document.getElementById('root')!).render(
             <MusicPlaybackProvider>
                 <SearchProvider>
                     <BrowserRouter>
+                        <ScrollToTop />
                         <KeyboardShortcuts />
                         <SearchCommand />
                         <PelagicaThemeLoader />
