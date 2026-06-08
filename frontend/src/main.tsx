@@ -15,6 +15,7 @@ import { SidebarBrowserProvider } from './context/SidebarBrowserContext.tsx';
 import './index.css';
 import './theme.css';
 import './i18n.ts';
+import { ScrollToTop } from './components/ScrollToTop.tsx';
 
 
 const HomePage = lazy(() => import('./pages/Home/HomePage.tsx'));
@@ -38,6 +39,7 @@ createRoot(document.getElementById('root')!).render(
                 <SearchProvider>
                     <BrowserRouter>
                         <SidebarBrowserProvider>
+                            <ScrollToTop />
                             <KeyboardShortcuts />
                             <SearchCommand />
                             <PelagicaThemeLoader />
