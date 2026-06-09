@@ -12,7 +12,20 @@ import { useLiveTvItems } from '@/hooks/api/useLiveTvItems';
 import { cn } from '@/lib/utils';
 import { getBackdropUrl, getPrimaryImageUrl } from '@/utils/jellyfinUrls';
 import type { BaseItemDto } from '@jellyfin/sdk/lib/generated-client/models';
-import { CalendarClock, Clapperboard, ImageOff, Info, Play, Radio } from 'lucide-react';
+import {
+    CalendarClock,
+    Clapperboard,
+    Film,
+    ImageOff,
+    Info,
+    Laugh,
+    Leaf,
+    Play,
+    Radio,
+    Rocket,
+    Star,
+    type LucideIcon,
+} from 'lucide-react';
 import { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router';
@@ -39,6 +52,29 @@ type ChannelSchedule = {
     schedule: ScheduleProgram[];
     currentProgram: ScheduleProgram | null;
 };
+
+type ChannelStyle = {
+    color: string;
+    Icon: LucideIcon;
+};
+
+const CHANNEL_STYLES: Record<string, ChannelStyle> = {
+    sitcoms: { color: '#f59e0b', Icon: Laugh },
+    'animated-movies': { color: '#ec4899', Icon: Film },
+    'sci-fi': { color: '#22d3ee', Icon: Rocket },
+    nature: { color: '#22c55e', Icon: Leaf },
+    'prime-cinema': { color: '#a78bfa', Icon: Star },
+};
+
+const DEFAULT_CHANNEL_STYLE: ChannelStyle = { color: '#38bdf8', Icon: Radio };
+
+function getChannelStyle(channel: LiveTvChannel): ChannelStyle {
+    return CHANNEL_STYLES[channel.id] ?? DEFAULT_CHANNEL_STYLE;
+}
+
+function colorWithAlpha(color: string, alpha: string): string {
+    return `${color}${alpha}`;
+}
 
 function getDisplayTitle(item: BaseItemDto): string {
     if (item.Type === 'Episode' && item.SeriesName) {
@@ -136,6 +172,8 @@ const SelectedProgramPanel = ({ program, now }: { program: ScheduleProgram; now:
     const { t } = useTranslation('livetv');
     const live = isProgramLive(program, now);
     const hasStarted = program.start.getTime() <= now.getTime();
+    const channelStyle = getChannelStyle(program.channel);
+    const ChannelIcon = channelStyle.Icon;
     const backdropUrl = program.item.Id
         ? getBackdropUrl(
               program.item.Id,
@@ -146,27 +184,34 @@ const SelectedProgramPanel = ({ program, now }: { program: ScheduleProgram; now:
 
     return (
         <section className="relative flex h-[19rem] overflow-hidden border-b bg-background px-4 pb-4 pt-18 sm:h-[24rem] sm:px-12">
-            <div className="absolute inset-0 -z-10 bg-background">
+            <div className="absolute inset-0 z-0 bg-background">
                 {backdropUrl && (
                     <img
                         src={backdropUrl}
                         alt=""
-                        className="h-full w-full object-cover opacity-25"
+                        className="h-full w-full object-cover opacity-45"
                     />
                 )}
-                <div className="absolute inset-0 bg-linear-to-r from-background via-background/90 to-background/60" />
-                <div className="absolute inset-0 bg-linear-to-b from-background/40 via-background/80 to-background" />
+                <div className="absolute inset-0 bg-linear-to-r from-background via-background/80 to-background/35" />
+                <div className="absolute inset-0 bg-linear-to-b from-background/20 via-background/65 to-background" />
+                <div
+                    className="absolute inset-y-0 left-0 w-1.5"
+                    style={{ backgroundColor: channelStyle.color }}
+                />
             </div>
 
-            <div className="grid h-full min-h-0 w-full grid-cols-1 items-center gap-5 md:grid-cols-[13rem_minmax(0,1fr)]">
+            <div className="relative z-10 grid h-full min-h-0 w-full grid-cols-1 items-center gap-5 md:grid-cols-[13rem_minmax(0,1fr)]">
                 <ProgramArtwork
                     item={program.item}
-                    className="hidden aspect-video w-full md:block"
+                    className="hidden aspect-video w-full shadow-xl shadow-black/30 md:block"
                 />
                 <div className="flex min-h-0 min-w-0 flex-col justify-center gap-3">
                     <div className="flex flex-wrap items-center gap-2">
-                        <Badge className="gap-1">
-                            <Radio className="size-3" />
+                        <Badge
+                            className="gap-1 border-transparent text-white"
+                            style={{ backgroundColor: channelStyle.color }}
+                        >
+                            <ChannelIcon className="size-3" />
                             {t('channel_label', {
                                 number: program.channel.number,
                                 name: program.channel.name,
@@ -214,22 +259,35 @@ const SelectedProgramPanel = ({ program, now }: { program: ScheduleProgram; now:
     );
 };
 
-const ChannelCell = ({ channel, currentProgram }: ChannelSchedule) => (
-    <div
-        className="sticky left-0 z-20 flex items-center gap-3 border-r border-b bg-background/95 px-3 backdrop-blur"
-        style={{ width: CHANNEL_COLUMN_WIDTH, height: ROW_HEIGHT }}
-    >
-        <div className="flex size-10 shrink-0 items-center justify-center rounded-md bg-muted text-sm font-semibold">
-            {channel.number}
+const ChannelCell = ({ channel, currentProgram }: ChannelSchedule) => {
+    const channelStyle = getChannelStyle(channel);
+    const ChannelIcon = channelStyle.Icon;
+
+    return (
+        <div
+            className="sticky left-0 z-20 flex items-center gap-3 border-r border-b bg-background/95 px-3 backdrop-blur"
+            style={{ width: CHANNEL_COLUMN_WIDTH, height: ROW_HEIGHT }}
+        >
+            <div
+                className="flex size-10 shrink-0 items-center justify-center rounded-md text-sm font-semibold text-white shadow-sm"
+                style={{ backgroundColor: channelStyle.color }}
+            >
+                <ChannelIcon className="size-5" />
+            </div>
+            <div className="min-w-0">
+                <div className="flex min-w-0 items-center gap-2">
+                    <span className="text-xs font-semibold text-muted-foreground">
+                        {channel.number}
+                    </span>
+                    <p className="truncate text-sm font-semibold">{channel.name}</p>
+                </div>
+                <p className="truncate text-xs text-muted-foreground">
+                    {currentProgram ? getDisplayTitle(currentProgram.item) : channel.description}
+                </p>
+            </div>
         </div>
-        <div className="min-w-0">
-            <p className="truncate text-sm font-semibold">{channel.name}</p>
-            <p className="truncate text-xs text-muted-foreground">
-                {currentProgram ? getDisplayTitle(currentProgram.item) : channel.description}
-            </p>
-        </div>
-    </div>
-);
+    );
+};
 
 const ProgramBlock = ({
     program,
@@ -246,6 +304,7 @@ const ProgramBlock = ({
     selected: boolean;
     onSelect: () => void;
 }) => {
+    const channelStyle = getChannelStyle(program.channel);
     const clippedStart = new Date(Math.max(program.start.getTime(), timelineStart.getTime()));
     const clippedEnd = new Date(Math.min(program.end.getTime(), timelineEnd.getTime()));
     const left = Math.max(0, getMinutesBetween(timelineStart, clippedStart) * PIXELS_PER_MINUTE);
@@ -260,12 +319,21 @@ const ProgramBlock = ({
             type="button"
             onClick={onSelect}
             className={cn(
-                'absolute top-1 bottom-1 overflow-hidden border bg-card px-3 py-2 text-left transition-colors hover:bg-accent',
-                selected && 'z-10 border-primary bg-primary/10',
+                'absolute top-1 bottom-1 overflow-hidden rounded-md border bg-card px-3 py-2 text-left shadow-sm transition-colors hover:bg-accent',
+                selected && 'z-10',
                 live && !selected && 'border-primary/60'
             )}
-            style={{ left, width }}
+            style={{
+                left,
+                width,
+                borderColor: selected || live ? channelStyle.color : undefined,
+                backgroundColor: selected ? colorWithAlpha(channelStyle.color, '1A') : undefined,
+            }}
         >
+            <div
+                className="absolute inset-y-0 left-0 w-1"
+                style={{ backgroundColor: channelStyle.color }}
+            />
             <div className="flex h-full min-w-0 flex-col justify-between">
                 <div className="min-w-0">
                     <p className="truncate text-sm font-semibold">
@@ -278,7 +346,10 @@ const ProgramBlock = ({
             </div>
             {live && (
                 <div className="absolute inset-x-0 bottom-2 h-1 overflow-hidden bg-muted">
-                    <div className="h-full bg-primary" style={{ width: visibleProgressWidth }} />
+                    <div
+                        className="h-full"
+                        style={{ width: visibleProgressWidth, backgroundColor: channelStyle.color }}
+                    />
                 </div>
             )}
         </button>
