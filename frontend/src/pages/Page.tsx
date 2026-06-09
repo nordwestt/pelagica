@@ -1,6 +1,6 @@
 import { Button } from '@/components/ui/button';
 import { type ReactNode, useEffect, useState } from 'react';
-import { useNavigate } from 'react-router';
+import { useLocation, useNavigate } from 'react-router';
 import { useCurrentUser } from '@/hooks/api/useCurrentUser';
 import { PageBackgroundProvider } from '@/context/PageBackgroundProvider';
 import { usePageBackground } from '@/hooks/usePageBackground';
@@ -57,6 +57,7 @@ const PageContent = ({
     showPlayerBar = true,
 }: PageProps) => {
     const navigate = useNavigate();
+    const location = useLocation();
     const { isLoading, isError, data: user } = useCurrentUser();
     const { background } = usePageBackground();
     const [showLoader, setShowLoader] = useState(true);
@@ -81,6 +82,13 @@ const PageContent = ({
             setShowLoader(false);
         };
     }, [isLoading]);
+
+    useEffect(() => {
+        if (location.pathname !== '/' && location.pathname !== '/search') return;
+
+        setSidebarOpen(false);
+        saveSidebarState(false);
+    }, [location.pathname]);
 
     if (requiresAuth && isLoading && showLoader)
         return <FullPageLoader message="Loading user information..." />;

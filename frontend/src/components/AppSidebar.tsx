@@ -69,8 +69,8 @@ export const LinkSidebarItem = ({
 
 const AppSidebar = () => {
     const { t } = useTranslation('sidebar');
-    const { setOpen, isMobile } = useSidebar();
-    const { browseMode } = useSidebarBrowser();
+    const { setOpen, setOpenMobile, isMobile } = useSidebar();
+    const { browseMode, setBrowseMode } = useSidebarBrowser();
     const location = useLocation();
     const { config } = useConfig();
     const serverUrl = getServerUrl();
@@ -89,6 +89,17 @@ const AppSidebar = () => {
             setOpen(true);
         }
     }, [browseMode, isMobile, setOpen]);
+
+    useEffect(() => {
+        if (location.pathname !== '/' && location.pathname !== '/search') return;
+
+        setBrowseMode(false);
+        if (isMobile) {
+            setOpenMobile(false);
+        } else {
+            setOpen(false);
+        }
+    }, [isMobile, location.pathname, setBrowseMode, setOpen, setOpenMobile]);
 
     return (
         <Sidebar variant="floating" collapsible="offcanvas" inline>
