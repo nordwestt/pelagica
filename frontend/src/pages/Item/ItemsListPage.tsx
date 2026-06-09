@@ -148,23 +148,19 @@ const ItemsListPage = ({
     const [contentWidth, setContentWidth] = useState(() =>
         typeof window !== 'undefined' ? window.innerWidth : 640
     );
-    const { columnCount, pageSize } = useMemo(
-        () => getItemsLayout(contentWidth),
-        [contentWidth]
-    );
+    const { columnCount, pageSize } = useMemo(() => getItemsLayout(contentWidth), [contentWidth]);
     const previousPageSizeRef = useRef(pageSize);
 
-    const updateSearchParams = useCallback((
-        nextPage: number,
-        nextSortBy = sortBy,
-        nextSortOrder = sortOrder
-    ) => {
-        const next = new URLSearchParams(searchParams);
-        next.set('page', String(nextPage));
-        next.set('sortBy', nextSortBy);
-        next.set('sortOrder', nextSortOrder);
-        setSearchParams(next);
-    }, [searchParams, setSearchParams, sortBy, sortOrder]);
+    const updateSearchParams = useCallback(
+        (nextPage: number, nextSortBy = sortBy, nextSortOrder = sortOrder) => {
+            const next = new URLSearchParams(searchParams);
+            next.set('page', String(nextPage));
+            next.set('sortBy', nextSortBy);
+            next.set('sortOrder', nextSortOrder);
+            setSearchParams(next);
+        },
+        [searchParams, setSearchParams, sortBy, sortOrder]
+    );
 
     useEffect(() => {
         const pageElement = pageRef.current;

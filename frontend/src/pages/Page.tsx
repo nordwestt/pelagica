@@ -63,6 +63,7 @@ const PageContent = ({
     const [showLoader, setShowLoader] = useState(true);
     const [sidebarOpen, setSidebarOpen] = useState<boolean | null>(() => getSidebarState());
     const [pageScrolled, setPageScrolled] = useState(false);
+    const closesSidebarForRoute = location.pathname === '/' || location.pathname === '/search';
 
     useEffect(() => {
         if (title) document.title = title;
@@ -84,11 +85,9 @@ const PageContent = ({
     }, [isLoading]);
 
     useEffect(() => {
-        if (location.pathname !== '/' && location.pathname !== '/search') return;
-
-        setSidebarOpen(false);
+        if (!closesSidebarForRoute) return;
         saveSidebarState(false);
-    }, [location.pathname]);
+    }, [closesSidebarForRoute]);
 
     if (requiresAuth && isLoading && showLoader)
         return <FullPageLoader message="Loading user information..." />;
@@ -134,7 +133,7 @@ const PageContent = ({
 
     const pageRenderContext: PageRenderContext = {
         showSidebar,
-        sidebarOpen: sidebarOpen ?? false,
+        sidebarOpen: closesSidebarForRoute ? false : (sidebarOpen ?? false),
         toggleSidebar: () => handleSidebarOpenChange(!(sidebarOpen ?? false)),
         setSidebarOpen: handleSidebarOpenChange,
     };
@@ -149,7 +148,7 @@ const PageContent = ({
             <div className="flex min-h-0 w-full flex-1 flex-row">
                 {showSidebar && (
                     <PageSidebar
-                        open={sidebarOpen ?? false}
+                        open={closesSidebarForRoute ? false : (sidebarOpen ?? false)}
                         onOpenChange={handleSidebarOpenChange}
                     />
                 )}
