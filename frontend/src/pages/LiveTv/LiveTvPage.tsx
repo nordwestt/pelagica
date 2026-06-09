@@ -158,7 +158,7 @@ const SelectedProgramPanel = ({ program, now }: { program: ScheduleProgram; now:
                 <div className="absolute inset-0 bg-linear-to-b from-background/40 via-background/80 to-background" />
             </div>
 
-            <div className="grid h-full min-h-0 w-full max-w-6xl grid-cols-1 items-center gap-5 md:grid-cols-[13rem_minmax(0,1fr)]">
+            <div className="grid h-full min-h-0 w-full grid-cols-1 items-center gap-5 md:grid-cols-[13rem_minmax(0,1fr)]">
                 <ProgramArtwork
                     item={program.item}
                     className="hidden aspect-video w-full md:block"
@@ -178,10 +178,10 @@ const SelectedProgramPanel = ({ program, now }: { program: ScheduleProgram; now:
                         <Badge variant="secondary">{getProgramSubtitle(program)}</Badge>
                     </div>
                     <div className="min-h-0">
-                        <h1 className="line-clamp-2 max-w-4xl text-3xl font-bold leading-tight sm:text-5xl">
+                        <h1 className="line-clamp-2 text-3xl font-bold leading-tight sm:text-5xl">
                             {getDisplayTitle(program.item)}
                         </h1>
-                        <p className="mt-2 max-h-16 max-w-4xl overflow-y-auto pr-2 text-sm text-muted-foreground sm:max-h-20 sm:text-base">
+                        <p className="mt-2 max-h-16 overflow-y-auto pr-2 text-sm text-muted-foreground sm:max-h-20 sm:text-base">
                             {program.item.Overview || program.channel.description}
                         </p>
                     </div>
