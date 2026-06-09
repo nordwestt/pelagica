@@ -2,7 +2,7 @@
 import { useReportPlaybackProgress } from '@/hooks/api/usePlaybackProgress';
 import { usePlaybackStart } from '@/hooks/api/usePlaybackStart';
 import { usePlaybackStop } from '@/hooks/api/usePlaybackStop';
-import { useParams } from 'react-router';
+import { useParams, useSearchParams } from 'react-router';
 import VideoPlayer, { type SubtitleTrack } from '@/pages/Player/VideoPlayer';
 import PlayerControls from '@/pages/Player/PlayerControls';
 import { useEffect, useMemo, useRef, useState } from 'react';
@@ -23,6 +23,7 @@ export type VideoJsPlayer = ReturnType<typeof import('video.js').default>;
 
 const PlayerPage = () => {
     const params = useParams<{ itemId: string }>();
+    const [searchParams] = useSearchParams();
     const itemId = params.itemId;
     const hasUserSelectedSubtitleRef = useRef(false);
     const hasUserSelectedAudioRef = useRef(false);
@@ -154,7 +155,10 @@ const PlayerPage = () => {
         return getPrimaryImageUrl(item?.Id);
     }, [item?.Id]);
 
-    const startTicks = item?.UserData?.PlaybackPositionTicks || 0;
+    const startTicksParam = Number(searchParams.get('startTicks') ?? 0);
+    const startTicks = Number.isFinite(startTicksParam)
+        ? startTicksParam
+        : item?.UserData?.PlaybackPositionTicks || 0;
 
     const handleToggleFullscreen = () => {
         if (!containerRef.current) return;
@@ -309,7 +313,7 @@ const PlayerPage = () => {
                 })}
                 poster={posterUrl}
                 onReady={setPlayer}
-                startTicks={item.UserData?.PlaybackPositionTicks || 0}
+                startTicks={startTicks}
                 subtitles={subtitleTracks}
                 isAudioSwitchRef={isAudioSwitchRef}
                 subtitleTrackIndex={subtitleTrackIndex}

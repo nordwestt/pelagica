@@ -24,6 +24,7 @@ const PersonPage = lazy(() => import('./pages/Person/PersonPage.tsx'));
 const PlayerPage = lazy(() => import('./pages/Player/PlayerPage.tsx'));
 const SettingsPage = lazy(() => import('./pages/Settings/SettingsPage.tsx'));
 const SearchPage = lazy(() => import('./pages/Search/SearchPage.tsx'));
+const LiveTvPage = lazy(() => import('./pages/LiveTv/LiveTvPage.tsx'));
 const ThemeBrowserPage = lazy(() => import('./pages/ThemeBrowser/ThemeBrowserPage.tsx'));
 const NotFoundPage = lazy(() => import('./pages/NotFound/NotFoundPage.tsx'));
 const PhotoViewerPage = lazy(() => import('./pages/PhotoViewer/PhotoViewerPage.tsx'));
@@ -53,6 +54,7 @@ createRoot(document.getElementById('root')!).render(
                                 <Route path="/settings" element={<SettingsPage />} />
                                 <Route path="/browse-themes" element={<ThemeBrowserPage />} />
                                 <Route path="/search" element={<SearchPage />} />
+                                <Route path="/live-tv" element={<LiveTvPage />} />
                                 <Route path="/photo/:itemId" element={<PhotoViewerPage />} />
                                 <Route path="*" element={<NotFoundPage />} />
                             </Routes>

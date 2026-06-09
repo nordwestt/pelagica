@@ -1,0 +1,16 @@
+{
+    "title": "Live TV",
+    "channels": "Channels",
+    "live_now": "Live now",
+    "channel_label": "Channel {{number}} - {{name}}",
+    "watch_live": "Watch live",
+    "details": "Details",
+    "guide_title": "TV Guide",
+    "all_channels": "All Channels",
+    "coming_up_next": "Coming Up Next",
+    "schedule": "Schedule",
+    "error_title": "Unable to load Live TV",
+    "error_description": "Pelagica could not fetch playable library items for the channel guide.",
+    "empty_title": "No playable items found",
+    "empty_description": "Add movies, episodes, or videos to Jellyfin and Live TV will build channels from them."
+}
