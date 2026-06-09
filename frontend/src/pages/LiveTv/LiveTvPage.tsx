@@ -91,6 +91,10 @@ function getVisiblePrograms(schedule: ScheduleProgram[], timelineStart: Date, ti
     );
 }
 
+function isProgramLive(program: ScheduleProgram, now: Date): boolean {
+    return program.start.getTime() <= now.getTime() && program.end.getTime() > now.getTime();
+}
+
 const LiveTvSkeleton = () => (
     <div className="flex min-h-dvh flex-col gap-4 px-4 pb-8 pt-24 sm:px-12">
         <Skeleton className="h-56 rounded-md" />
@@ -128,8 +132,10 @@ const ProgramArtwork = ({ item, className }: { item: BaseItemDto; className?: st
     );
 };
 
-const SelectedProgramPanel = ({ program }: { program: ScheduleProgram }) => {
+const SelectedProgramPanel = ({ program, now }: { program: ScheduleProgram; now: Date }) => {
     const { t } = useTranslation('livetv');
+    const live = isProgramLive(program, now);
+    const hasStarted = program.start.getTime() <= now.getTime();
     const backdropUrl = program.item.Id
         ? getBackdropUrl(
               program.item.Id,
@@ -139,7 +145,7 @@ const SelectedProgramPanel = ({ program }: { program: ScheduleProgram }) => {
         : '';
 
     return (
-        <section className="relative overflow-hidden border-b bg-background px-4 pb-5 pt-24 sm:px-12">
+        <section className="relative flex h-[19rem] overflow-hidden border-b bg-background px-4 pb-4 pt-18 sm:h-[24rem] sm:px-12">
             <div className="absolute inset-0 -z-10 bg-background">
                 {backdropUrl && (
                     <img
@@ -152,12 +158,12 @@ const SelectedProgramPanel = ({ program }: { program: ScheduleProgram }) => {
                 <div className="absolute inset-0 bg-linear-to-b from-background/40 via-background/80 to-background" />
             </div>
 
-            <div className="grid max-w-6xl grid-cols-1 gap-5 md:grid-cols-[13rem_minmax(0,1fr)]">
+            <div className="grid h-full min-h-0 w-full max-w-6xl grid-cols-1 items-center gap-5 md:grid-cols-[13rem_minmax(0,1fr)]">
                 <ProgramArtwork
                     item={program.item}
                     className="hidden aspect-video w-full md:block"
                 />
-                <div className="flex min-w-0 flex-col justify-end gap-3">
+                <div className="flex min-h-0 min-w-0 flex-col justify-center gap-3">
                     <div className="flex flex-wrap items-center gap-2">
                         <Badge className="gap-1">
                             <Radio className="size-3" />
@@ -171,21 +177,30 @@ const SelectedProgramPanel = ({ program }: { program: ScheduleProgram }) => {
                         </Badge>
                         <Badge variant="secondary">{getProgramSubtitle(program)}</Badge>
                     </div>
-                    <div>
+                    <div className="min-h-0">
                         <h1 className="line-clamp-2 max-w-4xl text-3xl font-bold leading-tight sm:text-5xl">
                             {getDisplayTitle(program.item)}
                         </h1>
-                        <p className="mt-2 line-clamp-3 max-w-4xl text-sm text-muted-foreground sm:text-base">
+                        <p className="mt-2 max-h-16 max-w-4xl overflow-y-auto pr-2 text-sm text-muted-foreground sm:max-h-20 sm:text-base">
                             {program.item.Overview || program.channel.description}
                         </p>
                     </div>
                     <div className="flex flex-wrap items-center gap-2">
-                        <Button asChild>
-                            <Link to={getPlayUrl(program)}>
-                                <Play />
-                                {t('watch_live')}
-                            </Link>
-                        </Button>
+                        {live ? (
+                            <Button asChild>
+                                <Link to={getPlayUrl(program)}>
+                                    <Play />
+                                    {t('watch_live')}
+                                </Link>
+                            </Button>
+                        ) : (
+                            <Button disabled>
+                                <CalendarClock />
+                                {hasStarted
+                                    ? t('finished_at', { time: formatProgramTime(program.end) })
+                                    : t('starts_at', { time: formatProgramTime(program.start) })}
+                            </Button>
+                        )}
                         <Button asChild variant="secondary">
                             <Link to={`/item/${program.item.Id}`}>
                                 <Info />
@@ -435,7 +450,7 @@ const LiveTvPage = () => {
             )}
             {selectedProgram && (
                 <>
-                    <SelectedProgramPanel program={selectedProgram} />
+                    <SelectedProgramPanel program={selectedProgram} now={now} />
                     <GuideGrid
                         channelSchedules={channelSchedules}
                         timelineStart={timelineStart}
