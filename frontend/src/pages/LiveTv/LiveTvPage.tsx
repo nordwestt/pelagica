@@ -235,12 +235,14 @@ const ProgramBlock = ({
     program,
     timelineStart,
     timelineEnd,
+    now,
     selected,
     onSelect,
 }: {
     program: ScheduleProgram;
     timelineStart: Date;
     timelineEnd: Date;
+    now: Date;
     selected: boolean;
     onSelect: () => void;
 }) => {
@@ -248,7 +250,10 @@ const ProgramBlock = ({
     const clippedEnd = new Date(Math.min(program.end.getTime(), timelineEnd.getTime()));
     const left = Math.max(0, getMinutesBetween(timelineStart, clippedStart) * PIXELS_PER_MINUTE);
     const width = Math.max(36, getMinutesBetween(clippedStart, clippedEnd) * PIXELS_PER_MINUTE);
-    const live = program.progress > 0 && program.progress < 1;
+    const live = isProgramLive(program, now);
+    const visibleProgressWidth = live
+        ? Math.min(width, Math.max(0, getMinutesBetween(clippedStart, now) * PIXELS_PER_MINUTE))
+        : 0;
 
     return (
         <button
@@ -270,15 +275,12 @@ const ProgramBlock = ({
                         {formatProgramTime(program.start)} - {formatProgramTime(program.end)}
                     </p>
                 </div>
-                {live && (
-                    <div className="h-1 overflow-hidden rounded-full bg-muted">
-                        <div
-                            className="h-full rounded-full bg-primary"
-                            style={{ width: `${Math.round(program.progress * 100)}%` }}
-                        />
-                    </div>
-                )}
             </div>
+            {live && (
+                <div className="absolute inset-x-0 bottom-2 h-1 overflow-hidden bg-muted">
+                    <div className="h-full bg-primary" style={{ width: visibleProgressWidth }} />
+                </div>
+            )}
         </button>
     );
 };
@@ -372,6 +374,7 @@ const GuideGrid = ({
                                             program={program}
                                             timelineStart={timelineStart}
                                             timelineEnd={timelineEnd}
+                                            now={now}
                                             selected={selectedProgramKey === getProgramKey(program)}
                                             onSelect={() => onSelectProgram(program)}
                                         />
