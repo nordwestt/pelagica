@@ -5,6 +5,7 @@ import { useTranslation } from 'react-i18next';
 import { getUserId } from '@/utils/localstorageCredentials';
 import BaseMusicListPage from '@/pages/Item/BaseMusicListPage';
 import { Skeleton } from '@/components/ui/skeleton';
+import MusicBackButton from './MusicBackButton';
 
 const MusicPlaylistView = () => {
     const { t } = useTranslation('item');
@@ -15,6 +16,7 @@ const MusicPlaylistView = () => {
     if (isLoading || configLoading) {
         return (
             <div className="flex flex-col gap-4 p-4">
+                <MusicBackButton />
                 <div className="flex gap-4">
                     <Skeleton className="w-32 h-32 rounded-md shrink-0" />
                     <div className="flex flex-col gap-2 flex-1">
@@ -37,12 +39,15 @@ const MusicPlaylistView = () => {
     }
 
     return (
-        <BaseMusicListPage
-            item={item}
-            config={config}
-            listType={t('playlist')}
-            showBackground={false}
-        />
+        <>
+            <MusicBackButton />
+            <BaseMusicListPage
+                item={item}
+                config={config}
+                listType={t('playlist')}
+                showBackground={false}
+            />
+        </>
     );
 };
 
