@@ -1,7 +1,7 @@
 import type { BaseItemDto } from '@jellyfin/sdk/lib/generated-client/models';
 import { Link } from 'react-router';
 import { Skeleton } from './ui/skeleton';
-import { getPrimaryImageUrl } from '@/utils/jellyfinUrls';
+import { getPrimaryImageUrl, type ImageSize } from '@/utils/jellyfinUrls';
 import { useConfig } from '@/hooks/api/useConfig';
 import WatchedStateBadge from './WatchedStateBadge';
 import { useState } from 'react';
@@ -39,6 +39,10 @@ const ScrollableSectionPoster = ({
     const roundedClass = isArtist ? 'rounded-full' : 'rounded-md';
 
     const primaryImageTag = item?.ImageTags?.Primary;
+
+    const posterImageSize: ImageSize = isSquareType
+        ? { width: 300, height: 300 }
+        : { width: 300, height: 450 };
 
     const MUSIC_ROUTES: Record<string, string> = {
         MusicAlbum: '/music/album',
@@ -79,7 +83,7 @@ const ScrollableSectionPoster = ({
                             ? posterUrl
                             : getPrimaryImageUrl(
                                   itemId || item?.Id || '',
-                                  undefined,
+                                  posterImageSize,
                                   primaryImageTag
                               )
                     }
