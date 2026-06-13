@@ -76,7 +76,11 @@ const PersonPageContent = ({ item, t }: PersonPageProps) => {
             <div className="fixed top-0 left-0 w-full h-full -z-20 overflow-hidden">
                 <div className="absolute inset-0">
                     <img
-                        src={getPrimaryImageUrl(item.Id || '', undefined, item.ImageTags?.Primary)}
+                        src={getPrimaryImageUrl(
+                            item.Id || '',
+                            { width: 400, height: 600 },
+                            item.ImageTags?.Primary
+                        )}
                         alt={item.Name + ' Backdrop'}
                         className="w-full h-full object-cover blur-3xl scale-110 opacity-40"
                     />
@@ -105,7 +109,7 @@ const PersonPageContent = ({ item, t }: PersonPageProps) => {
                                 <img
                                     src={getPrimaryImageUrl(
                                         item.Id || '',
-                                        undefined,
+                                        { width: 576, height: 864 },
                                         item.ImageTags?.Primary
                                     )}
                                     alt={item.Name + ' Primary'}
