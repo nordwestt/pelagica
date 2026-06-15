@@ -53,6 +53,16 @@ tasks:
     cmds:
       - go mod download
       
+  docker:
+    desc: Build and run the local Docker image
+    cmds:
+      - docker compose -f docker-compose.local.yml up --build
+
+  docker:stop:
+    desc: Stop the local Docker container
+    cmds:
+      - docker compose -f docker-compose.local.yml down
+
   stats:
     desc: Count the amount of lines of code
     cmds:
