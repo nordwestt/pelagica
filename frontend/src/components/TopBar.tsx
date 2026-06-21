@@ -88,6 +88,7 @@ import {
     saveLocalTheme,
 } from '@/utils/localTheme';
 import { useThemes } from '@/hooks/api/themes/useThemes';
+import { useQueryClient } from '@tanstack/react-query';
 
 const AuthorizeQuickConnectDialog = ({
     onAuthorize,
@@ -267,6 +268,7 @@ const LanguageCombobox = ({
 const UserMenu = () => {
     const { t } = useTranslation('sidebar');
     const navigate = useNavigate();
+    const queryClient = useQueryClient();
     const { theme, setTheme } = useTheme();
     const { data: user } = useCurrentUser();
     const updateUserConfiguration = useUpdateUserConfiguration();
@@ -515,8 +517,9 @@ const UserMenu = () => {
                 <DropdownMenuSeparator />
                 <DropdownMenuItem
                     onClick={() => {
-                        logout();
-                        navigate('/login', { replace: true });
+                        logout(queryClient).then(() => {
+                            navigate('/login', { replace: true });
+                        });
                     }}
                 >
                     <LogOut />
