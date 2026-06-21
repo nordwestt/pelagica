@@ -139,6 +139,8 @@
     "link_icon_label": "Symbol",
     "link_icon_placeholder": "Symbol auswählen",
     "link_icon_search_placeholder": "Symbole durchsuchen...",
+    "recently_added_libraries": "Bibliotheken",
+    "recently_added_libraries_description": "Wähle aus, welche Bibliotheken im Bereich \"Kürzlich hinzugefügt\" angezeigt werden sollen. Wenn keine ausgewählt sind, werden alle Bibliotheken angezeigt.",
     "section_type_studios": "Studios",
     "show_download_button_label": "Download-Button anzeigen",
     "artist": "Interpret",

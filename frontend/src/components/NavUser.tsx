@@ -70,6 +70,7 @@ import {
     SelectLabel,
 } from '@/components/ui/select';
 import { useThemes } from '@/hooks/api/themes/useThemes';
+import { useQueryClient } from '@tanstack/react-query';
 
 const FlagIcon = ({ countryCode }: { countryCode: string }) => {
     const flagUrl = `https://flagcdn.com/${countryCode.toLowerCase()}.svg`;
@@ -269,6 +270,7 @@ const LanguageCombobox = ({
 export function NavUser() {
     const { t } = useTranslation('sidebar');
     const navigate = useNavigate();
+    const queryClient = useQueryClient();
     const { isMobile } = useSidebar();
     const { theme, setTheme } = useTheme();
     const { data: user } = useCurrentUser();
@@ -558,7 +560,7 @@ export function NavUser() {
                         <DropdownMenuSeparator />
                         <DropdownMenuItem
                             onClick={() => {
-                                logout();
+                                logout(queryClient);
                                 navigate('/login', { replace: true });
                             }}
                         >

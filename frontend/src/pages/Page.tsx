@@ -10,6 +10,7 @@ import { logout } from '@/api/logout';
 import FullPageError from '@/components/FullPageError';
 import TopBar from '@/components/TopBar';
 import { cn } from '../lib/utils';
+import { useQueryClient } from '@tanstack/react-query';
 
 interface PageProps {
     title?: string;
@@ -42,6 +43,7 @@ const PageContent = ({
     showPlayerBar = true,
 }: PropsWithChildren<PageProps>) => {
     const navigate = useNavigate();
+    const queryClient = useQueryClient();
     const { isLoading, isError, data: user } = useCurrentUser();
     const { background } = usePageBackground();
     const [showLoader, setShowLoader] = useState(true);
@@ -74,8 +76,9 @@ const PageContent = ({
                 content={
                     <Button
                         onClick={() => {
-                            logout();
-                            navigate('/login', { replace: true });
+                            logout(queryClient).then(() => {
+                                navigate('/login', { replace: true });
+                            });
                         }}
                     >
                         Return to login

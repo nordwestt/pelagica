@@ -35,11 +35,14 @@ export interface SectionItemsConfig {
     isUnplayed?: boolean;
 }
 
+export const MEDIABAR_SIZES = ['small', 'medium', 'large', 'xlarge'] as const;
+export type MediabarSize = (typeof MEDIABAR_SIZES)[number];
+
 /** A large carousel banner showcasing featured media with backdrop images */
 export interface MediaBarSection extends BaseHomeScreenSection {
     type: 'mediaBar';
     /** Size of the media bar carousel */
-    size?: 'small' | 'medium' | 'large' | 'xlarge';
+    size?: MediabarSize;
     /** Configuration for which items to display in the carousel */
     items?: SectionItemsConfig;
     /** Whether to show the favorite button on the media bar items */
@@ -53,6 +56,8 @@ export interface RecentlyAddedSection extends BaseHomeScreenSection {
     type: 'recentlyAdded';
     /** Maximum number of items to display */
     limit?: number;
+    /** Library IDs to show. If empty or undefined, all libraries are shown */
+    libraryIds?: string[];
 }
 
 export const DETAIL_FIELDS = [
@@ -353,6 +358,8 @@ export const useConfig = () => {
     const { data, isLoading, error } = useQuery({
         queryKey: CONFIG_QUERY_KEY,
         queryFn: fetchConfig,
+        staleTime: Infinity,
+        gcTime: 30 * 60 * 1000, // 30 minutes
     });
 
     return {
