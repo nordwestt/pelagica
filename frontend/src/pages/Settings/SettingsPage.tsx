@@ -13,6 +13,7 @@ import {
     type DetailBadge,
     type DetailField,
     type HomeScreenSection,
+    type RecentlyAddedSection,
     type SectionItemsConfig,
     type ConfigLink,
 } from '@/hooks/api/useConfig';
@@ -172,6 +173,41 @@ const MultiSelectInput = ({
     </div>
 );
 
+const RecentlyAddedConfigEditor = ({
+    section,
+    onChange,
+}: {
+    section: RecentlyAddedSection;
+    onChange: (section: RecentlyAddedSection) => void;
+}) => {
+    const { t } = useTranslation('settings');
+    const { data: userViews } = useUserViews();
+
+    const libraryOptions: Option[] = (userViews?.Items || [])
+        .filter((v) => v.Id && v.Name)
+        .map((v) => ({ value: v.Id!, label: v.Name! }));
+
+    return (
+        <div className="mt-6 space-y-4">
+            <MultiSelectInput
+                label={t('recently_added_libraries')}
+                options={libraryOptions}
+                selected={section.libraryIds || []}
+                onChange={(selected) => onChange({ ...section, libraryIds: selected })}
+                description={t('recently_added_libraries_description')}
+            />
+            <StringInput
+                label={t('section_limit_label')}
+                value={String(section.limit || '')}
+                onChange={(value) =>
+                    onChange({ ...section, limit: value ? parseInt(value) : undefined })
+                }
+                placeholder={t('section_limit_placeholder')}
+            />
+        </div>
+    );
+};
+
 const SectionEditor = ({
     section,
     onSave,
@@ -252,6 +288,13 @@ const SectionEditor = ({
                                 placeholder={t('section_limit_placeholder')}
                             />
                         )}
+
+                    {editedSection.type === 'recentlyAdded' && (
+                        <RecentlyAddedConfigEditor
+                            section={editedSection}
+                            onChange={setEditedSection}
+                        />
+                    )}
 
                     {editedSection.type === 'mediaBar' && (
                         <>

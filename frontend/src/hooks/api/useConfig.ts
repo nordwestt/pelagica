@@ -53,6 +53,8 @@ export interface RecentlyAddedSection extends BaseHomeScreenSection {
     type: 'recentlyAdded';
     /** Maximum number of items to display */
     limit?: number;
+    /** Library IDs to show. If empty or undefined, all libraries are shown */
+    libraryIds?: string[];
 }
 
 export const DETAIL_FIELDS = [

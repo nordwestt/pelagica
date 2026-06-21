@@ -119,12 +119,18 @@ const HomePage = () => {
                                 />
                             );
 
-                        case 'recentlyAdded':
+                        case 'recentlyAdded': {
+                            const filteredViews =
+                                section.libraryIds && section.libraryIds.length > 0
+                                    ? userViews?.Items?.filter(
+                                          (view) => view.Id && section.libraryIds!.includes(view.Id)
+                                      )
+                                    : userViews?.Items;
                             return (
                                 <div key={index} className="flex flex-col gap-4">
-                                    {userViews && userViews.Items ? (
+                                    {userViews && filteredViews ? (
                                         <>
-                                            {userViews.Items.map((view) => (
+                                            {filteredViews.map((view) => (
                                                 <RecentlyAddedRow
                                                     key={view.Id}
                                                     view={view}
@@ -140,6 +146,7 @@ const HomePage = () => {
                                     )}
                                 </div>
                             );
+                        }
 
                         case 'items':
                             return (
