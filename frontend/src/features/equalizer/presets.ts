@@ -7,12 +7,7 @@ export const SLEEP_FADE_MIN_VOLUME_RATIO = 0.35;
 export const CUSTOM_PRESET_GAIN_MIN = -12;
 export const CUSTOM_PRESET_GAIN_MAX = 12;
 
-export type BuiltInEqualizerPresetId =
-    | 'flat'
-    | 'bassBoost'
-    | 'vocalBoost'
-    | 'podcast'
-    | 'sleep';
+export type BuiltInEqualizerPresetId = 'flat' | 'bassBoost' | 'vocalBoost' | 'podcast' | 'sleep';
 
 /** @deprecated Use BuiltInEqualizerPresetId or EqualizerSelection */
 export type EqualizerPresetId = BuiltInEqualizerPresetId;

@@ -147,7 +147,9 @@ const EqualizerPopover = ({
                                 </p>
                                 <ul className="space-y-0.5">
                                     {customPresets.map((customPreset) => {
-                                        const selection = createCustomPresetSelection(customPreset.id);
+                                        const selection = createCustomPresetSelection(
+                                            customPreset.id
+                                        );
                                         const isSelected = preset === selection;
                                         const Icon = CUSTOM_PRESET_ICON;
 
@@ -171,7 +173,9 @@ const EqualizerPopover = ({
                                                         <Check
                                                             className={cn(
                                                                 'ml-auto size-4 shrink-0',
-                                                                isSelected ? 'opacity-100' : 'opacity-0'
+                                                                isSelected
+                                                                    ? 'opacity-100'
+                                                                    : 'opacity-0'
                                                             )}
                                                         />
                                                     </button>

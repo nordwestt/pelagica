@@ -116,7 +116,11 @@ export function useAudioEqualizer({
                 if (isSleepPreset && isHighShelf && sleepFadeEnabled) {
                     applyBandToFilter(filter, {
                         ...band,
-                        gain: lerp(SLEEP_FADE_HIGH_SHELF_START, SLEEP_FADE_HIGH_SHELF_END, fadeProgress),
+                        gain: lerp(
+                            SLEEP_FADE_HIGH_SHELF_START,
+                            SLEEP_FADE_HIGH_SHELF_END,
+                            fadeProgress
+                        ),
                     });
                 } else {
                     applyBandToFilter(filter, band);
