@@ -6,6 +6,7 @@ interface SearchContextType {
     isOpen: boolean;
     searchMode: SearchMode;
     openSearch: (mode?: SearchMode) => void;
+    setSearchMode: (mode: SearchMode) => void;
     closeSearch: () => void;
 }
 

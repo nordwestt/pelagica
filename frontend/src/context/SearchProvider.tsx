@@ -14,6 +14,7 @@ export const SearchProvider = ({ children }: { children: ReactNode }) => {
                     setSearchMode(mode ?? 'movies-tv');
                     setIsOpen(true);
                 },
+                setSearchMode,
                 closeSearch: () => setIsOpen(false),
             }}
         >

@@ -6,21 +6,35 @@ import {
     CommandItem,
     CommandList,
 } from '@/components/ui/command';
-import { useSearch } from '@/context/SearchContext';
+import { useSearch, type SearchMode } from '@/context/SearchContext';
 import { useSearchItems } from '@/hooks/api/useSearchItems';
 import { useMusicPlayback } from '@/hooks/useMusicPlayback';
 import { useNavigate } from 'react-router';
 import { Skeleton } from './ui/skeleton';
-import { Calendar, Star } from 'lucide-react';
+import { Calendar, Clapperboard, Music, Star } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import JellyfinItemKindIcon from './JellyfinItemKindIcon';
 import { Badge } from './ui/badge';
+import { Button } from './ui/button';
 import type { BaseItemKind } from '@jellyfin/sdk/lib/generated-client/models/base-item-kind';
 import { getPrimaryImageUrl } from '../utils/jellyfinUrls';
+import { cn } from '@/lib/utils';
+
+const isMac =
+    typeof navigator !== 'undefined' && /Mac|iPhone|iPad|iPod/.test(navigator.userAgent);
+
+const SEARCH_MODES: {
+    mode: SearchMode;
+    icon: typeof Clapperboard;
+    shortcut: string;
+}[] = [
+    { mode: 'movies-tv', icon: Clapperboard, shortcut: isMac ? '⌘K' : 'Ctrl+K' },
+    { mode: 'music', icon: Music, shortcut: isMac ? '⌘M' : 'Ctrl+M' },
+];
 
 export const SearchCommand = () => {
     const { t } = useTranslation('search');
-    const { isOpen, searchMode, closeSearch } = useSearch();
+    const { isOpen, searchMode, setSearchMode, closeSearch } = useSearch();
     const navigate = useNavigate();
     const { loadTrack } = useMusicPlayback();
     const [query, setQuery] = useState('');
@@ -86,10 +100,35 @@ export const SearchCommand = () => {
             shouldFilter={false}
         >
             <CommandInput
-                placeholder={t('input_placeholder')}
+                placeholder={
+                    searchMode === 'music'
+                        ? t('input_placeholder_music')
+                        : t('input_placeholder_movies_tv')
+                }
                 value={query}
                 onValueChange={setQuery}
             />
+            <div className="flex gap-1 border-b px-2 py-1.5">
+                {SEARCH_MODES.map(({ mode, icon: Icon, shortcut }) => (
+                    <Button
+                        key={mode}
+                        type="button"
+                        variant={searchMode === mode ? 'secondary' : 'ghost'}
+                        size="sm"
+                        aria-pressed={searchMode === mode}
+                        className={cn('h-8 flex-1 justify-between px-2.5', searchMode !== mode && 'text-muted-foreground')}
+                        onClick={() => setSearchMode(mode)}
+                    >
+                        <span className="flex items-center gap-1.5">
+                            <Icon className="size-3.5" />
+                            <span className="text-xs">{t('typefilter_' + mode)}</span>
+                        </span>
+                        <kbd className="pointer-events-none hidden h-5 select-none items-center rounded border bg-muted px-1.5 font-mono text-[10px] font-medium text-muted-foreground sm:inline-flex">
+                            {shortcut}
+                        </kbd>
+                    </Button>
+                ))}
+            </div>
             <CommandList className="[&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:bg-muted-foreground [&::-webkit-scrollbar-thumb]:rounded-full">
                 {error ? (
                     <div className="px-4 py-8 text-center text-sm text-destructive">
