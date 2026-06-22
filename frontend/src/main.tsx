@@ -68,7 +68,10 @@ createRoot(document.getElementById('root')!).render(
                                             path="playlist/:itemId"
                                             element={<MusicPlaylistView />}
                                         />
-                                        <Route path="artist/:itemId" element={<MusicArtistView />} />
+                                        <Route
+                                            path="artist/:itemId"
+                                            element={<MusicArtistView />}
+                                        />
                                     </Route>
                                     <Route path="*" element={<NotFoundPage />} />
                                 </Routes>
