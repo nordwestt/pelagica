@@ -5,7 +5,6 @@ import {
     SLEEP_FADE_HIGH_SHELF_START,
     SLEEP_FADE_LOWPASS_END,
     SLEEP_FADE_LOWPASS_START,
-    SLEEP_FADE_MIN_VOLUME_RATIO,
     type EqualizerBand,
     lerp,
 } from './presets';
@@ -17,6 +16,7 @@ interface UseAudioEqualizerOptions {
     sleepFadeEnabled: boolean;
     volume: number;
     isPlaying: boolean;
+    onSleepFadeComplete?: () => void;
 }
 
 interface EqualizerGraph {
@@ -43,9 +43,11 @@ export function useAudioEqualizer({
     sleepFadeEnabled,
     volume,
     isPlaying,
+    onSleepFadeComplete,
 }: UseAudioEqualizerOptions) {
     const graphRef = useRef<EqualizerGraph | null>(null);
     const sleepFadeStartedAtRef = useRef<number | null>(null);
+    const sleepFadeCompletedRef = useRef(false);
     const fadeFrameRef = useRef<number | null>(null);
     const initAttemptedRef = useRef(false);
     const [equalizerAvailable, setEqualizerAvailable] = useState(true);
@@ -155,7 +157,7 @@ export function useAudioEqualizer({
 
             const sleepActive = isSleepPreset && sleepFadeEnabled;
             const effectiveVolume = sleepActive
-                ? volume * lerp(1, SLEEP_FADE_MIN_VOLUME_RATIO, fadeProgress)
+                ? volume * lerp(1, 0, fadeProgress)
                 : volume;
 
             if (graph) {
@@ -173,14 +175,9 @@ export function useAudioEqualizer({
         return Math.min(1, elapsed / SLEEP_FADE_DURATION_MS);
     }, []);
 
-    const updateSleepFade = useCallback(() => {
-        const progress = getFadeProgress();
-        applyBands(bands, progress);
-        applyVolume(progress);
-    }, [applyBands, applyVolume, bands, getFadeProgress]);
-
     const resetSleepFadeSession = useCallback(() => {
         sleepFadeStartedAtRef.current = null;
+        sleepFadeCompletedRef.current = false;
         if (fadeFrameRef.current !== null) {
             cancelAnimationFrame(fadeFrameRef.current);
             fadeFrameRef.current = null;
@@ -188,8 +185,21 @@ export function useAudioEqualizer({
     }, []);
 
     const startSleepFadeSession = useCallback(() => {
+        sleepFadeCompletedRef.current = false;
         sleepFadeStartedAtRef.current = Date.now();
     }, []);
+
+    const updateSleepFade = useCallback(() => {
+        const progress = getFadeProgress();
+        applyBands(bands, progress);
+        applyVolume(progress);
+
+        if (progress >= 1 && !sleepFadeCompletedRef.current) {
+            sleepFadeCompletedRef.current = true;
+            onSleepFadeComplete?.();
+            resetSleepFadeSession();
+        }
+    }, [applyBands, applyVolume, bands, getFadeProgress, onSleepFadeComplete, resetSleepFadeSession]);
 
     useEffect(() => {
         if (isSleepPreset && sleepFadeEnabled) {

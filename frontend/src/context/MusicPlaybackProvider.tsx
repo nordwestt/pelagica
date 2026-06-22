@@ -126,6 +126,11 @@ export const MusicPlaybackProvider = ({ children }: PropsWithChildren) => {
     }, [equalizerPreviewBands, equalizerPreset, customEqualizerPresets]);
     const isSleepPreset = equalizerPreset === 'sleep' && !equalizerPreviewBands;
 
+    const pauseRef = useRef<() => void>(() => {});
+    const onSleepFadeComplete = useCallback(() => {
+        pauseRef.current();
+    }, []);
+
     const { equalizerAvailable, resumeContext, resetSleepFadeSession } = useAudioEqualizer({
         audioRef,
         bands: activeEqualizerBands,
@@ -133,6 +138,7 @@ export const MusicPlaybackProvider = ({ children }: PropsWithChildren) => {
         sleepFadeEnabled,
         volume,
         isPlaying,
+        onSleepFadeComplete,
     });
 
     useEffect(() => {
@@ -276,6 +282,10 @@ export const MusicPlaybackProvider = ({ children }: PropsWithChildren) => {
             });
         }
     }, [currentTrack, reportProgress]);
+
+    useEffect(() => {
+        pauseRef.current = pause;
+    }, [pause]);
 
     const togglePlayPause = useCallback(() => {
         if (isPlayingRef.current) pause();

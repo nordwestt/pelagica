@@ -27,7 +27,7 @@
         "sleep": "Sleep"
     },
     "sleepFade": "Gradual fade (20 min)",
-    "sleepFadeDescription": "Gradually reduces highs and volume over 20 minutes.",
+    "sleepFadeDescription": "Gradually fades to silence and pauses playback.",
     "equalizerUnavailable": "Equalizer unavailable for this stream. Volume fade still applies.",
     "customPresets": "Custom",
     "customPresetNew": "New custom preset",
