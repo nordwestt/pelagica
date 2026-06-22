@@ -206,7 +206,16 @@ export function useAudioEqualizer({
         const progress = isSleepPreset && sleepFadeEnabled ? getFadeProgress() : 0;
         applyBands(bands, progress);
         applyVolume(progress);
-    }, [bands, isSleepPreset, sleepFadeEnabled, volume, applyBands, applyVolume, getFadeProgress, initGraph]);
+    }, [
+        bands,
+        isSleepPreset,
+        sleepFadeEnabled,
+        volume,
+        applyBands,
+        applyVolume,
+        getFadeProgress,
+        initGraph,
+    ]);
 
     useEffect(() => {
         if (!isPlaying || !isSleepPreset || !sleepFadeEnabled) {
