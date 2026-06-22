@@ -77,7 +77,9 @@ const SleepModePanel = ({
                         className="w-20"
                         aria-label={t('sleepFadeDuration')}
                     />
-                    <span className="text-sm text-muted-foreground">{t('sleepFadeDurationUnit')}</span>
+                    <span className="text-sm text-muted-foreground">
+                        {t('sleepFadeDurationUnit')}
+                    </span>
                     {isRunning ? (
                         <Button
                             variant="outline"

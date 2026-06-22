@@ -157,9 +157,7 @@ export function useAudioEqualizer({
             const audio = audioRef.current;
 
             const sleepActive = isSleepPreset && sleepFadeEnabled;
-            const effectiveVolume = sleepActive
-                ? volume * lerp(1, 0, fadeProgress)
-                : volume;
+            const effectiveVolume = sleepActive ? volume * lerp(1, 0, fadeProgress) : volume;
 
             if (graph) {
                 graph.gainNode.gain.value = effectiveVolume;
@@ -200,7 +198,14 @@ export function useAudioEqualizer({
             onSleepFadeComplete?.();
             resetSleepFadeSession();
         }
-    }, [applyBands, applyVolume, bands, getFadeProgress, onSleepFadeComplete, resetSleepFadeSession]);
+    }, [
+        applyBands,
+        applyVolume,
+        bands,
+        getFadeProgress,
+        onSleepFadeComplete,
+        resetSleepFadeSession,
+    ]);
 
     useEffect(() => {
         if (isSleepPreset && sleepFadeEnabled) {
@@ -216,7 +221,13 @@ export function useAudioEqualizer({
         if (!isSleepPreset || !sleepFadeEnabled) return;
         resetSleepFadeSession();
         startSleepFadeSession();
-    }, [sleepFadeDurationMs, isSleepPreset, sleepFadeEnabled, resetSleepFadeSession, startSleepFadeSession]);
+    }, [
+        sleepFadeDurationMs,
+        isSleepPreset,
+        sleepFadeEnabled,
+        resetSleepFadeSession,
+        startSleepFadeSession,
+    ]);
 
     useEffect(() => {
         initGraph();
