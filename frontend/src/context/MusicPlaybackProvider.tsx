@@ -1,4 +1,4 @@
-import { type PropsWithChildren, useCallback, useEffect, useRef, useState } from 'react';
+import { type PropsWithChildren, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
     MusicPlaybackContext,
     type MusicPlaybackContextType,
@@ -9,6 +9,20 @@ import { usePlaybackStart } from '@/hooks/api/usePlaybackStart';
 import { useReportPlaybackProgress } from '@/hooks/api/usePlaybackProgress';
 import { usePlaybackStop } from '@/hooks/api/usePlaybackStop';
 import { useMediaSession } from '@/hooks/useMediaSession';
+import {
+    EQUALIZER_PRESET_STORAGE_KEY,
+    SLEEP_FADE_STORAGE_KEY,
+    getCustomPresetId,
+    isCustomPresetSelection,
+    loadStoredCustomPresets,
+    loadStoredPreset,
+    loadStoredSleepFadeEnabled,
+    resolvePresetBands,
+    saveCustomPresets,
+    type CustomEqualizerPreset,
+    type EqualizerSelection,
+} from '@/features/equalizer/presets';
+import { useAudioEqualizer } from '@/features/equalizer/useAudioEqualizer';
 
 const VOLUME_STORAGE_KEY = 'music_volume';
 const DEFAULT_VOLUME = 0.5;
@@ -30,6 +44,11 @@ export const MusicPlaybackProvider = ({ children }: PropsWithChildren) => {
 
         return Number.isFinite(parsed) ? clampVolume(parsed) : DEFAULT_VOLUME;
     });
+    const [customEqualizerPresets, setCustomEqualizerPresets] = useState(loadStoredCustomPresets);
+    const [equalizerPreset, setEqualizerPresetState] = useState<EqualizerSelection>(() =>
+        loadStoredPreset(loadStoredCustomPresets())
+    );
+    const [sleepFadeEnabled, setSleepFadeEnabledState] = useState(loadStoredSleepFadeEnabled);
     const [shuffle, setShuffle] = useState(false);
     const [repeat, setRepeat] = useState(false);
     const [queue, setQueue] = useState<MusicPlaybackTrack[]>([]);
@@ -97,10 +116,74 @@ export const MusicPlaybackProvider = ({ children }: PropsWithChildren) => {
         });
     }, [queue, currentIndex, currentTrack, shuffleArray]);
 
+    const activeEqualizerBands = useMemo(
+        () => resolvePresetBands(equalizerPreset, customEqualizerPresets),
+        [equalizerPreset, customEqualizerPresets]
+    );
+    const isSleepPreset = equalizerPreset === 'sleep';
+
+    const { equalizerAvailable, resumeContext, resetSleepFadeSession } = useAudioEqualizer({
+        audioRef,
+        bands: activeEqualizerBands,
+        isSleepPreset,
+        sleepFadeEnabled,
+        volume,
+        isPlaying,
+    });
+
     useEffect(() => {
-        audioRef.current.volume = volume;
+        if (!equalizerAvailable) {
+            audioRef.current.volume = volume;
+        }
         localStorage.setItem(VOLUME_STORAGE_KEY, volume.toString());
-    }, [volume]);
+    }, [volume, equalizerAvailable]);
+
+    const setEqualizerPreset = useCallback((preset: EqualizerSelection) => {
+        setEqualizerPresetState(preset);
+        localStorage.setItem(EQUALIZER_PRESET_STORAGE_KEY, preset);
+    }, []);
+
+    const saveCustomEqualizerPreset = useCallback(
+        (preset: CustomEqualizerPreset) => {
+            setCustomEqualizerPresets((prev) => {
+                const existingIndex = prev.findIndex((item) => item.id === preset.id);
+                const next =
+                    existingIndex === -1
+                        ? [...prev, preset]
+                        : prev.map((item, index) => (index === existingIndex ? preset : item));
+                saveCustomPresets(next);
+                return next;
+            });
+        },
+        []
+    );
+
+    const deleteCustomEqualizerPreset = useCallback(
+        (id: string) => {
+            setCustomEqualizerPresets((prev) => {
+                const next = prev.filter((preset) => preset.id !== id);
+                saveCustomPresets(next);
+                return next;
+            });
+
+            setEqualizerPresetState((current) => {
+                if (isCustomPresetSelection(current) && getCustomPresetId(current) === id) {
+                    localStorage.setItem(EQUALIZER_PRESET_STORAGE_KEY, 'flat');
+                    return 'flat';
+                }
+                return current;
+            });
+        },
+        []
+    );
+
+    const setSleepFadeEnabled = useCallback(
+        (enabled: boolean) => {
+            setSleepFadeEnabledState(enabled);
+            localStorage.setItem(SLEEP_FADE_STORAGE_KEY, enabled.toString());
+        },
+        []
+    );
 
     const internalLoadTrack = useCallback(
         (track: MusicPlaybackTrack, autoPlay = false) => {
@@ -184,8 +267,9 @@ export const MusicPlaybackProvider = ({ children }: PropsWithChildren) => {
     }, [currentTrack, isPlaying, reportProgress]);
 
     const play = useCallback(async () => {
+        await resumeContext();
         await audioRef.current.play();
-    }, []);
+    }, [resumeContext]);
 
     const pause = useCallback(() => {
         audioRef.current.pause();
@@ -287,7 +371,8 @@ export const MusicPlaybackProvider = ({ children }: PropsWithChildren) => {
         setQueue([]);
         setCurrentIndex(-1);
         originalQueueRef.current = [];
-    }, [currentTrack, currentTime, stopPlayback]);
+        resetSleepFadeSession();
+    }, [currentTrack, currentTime, stopPlayback, resetSleepFadeSession]);
 
     useMediaSession({
         track: currentTrack,
@@ -312,6 +397,14 @@ export const MusicPlaybackProvider = ({ children }: PropsWithChildren) => {
         setDuration,
         volume,
         setVolume,
+        equalizerPreset,
+        setEqualizerPreset,
+        customEqualizerPresets,
+        saveCustomEqualizerPreset,
+        deleteCustomEqualizerPreset,
+        sleepFadeEnabled,
+        setSleepFadeEnabled,
+        equalizerAvailable,
         shuffle,
         toggleShuffle,
         repeat,

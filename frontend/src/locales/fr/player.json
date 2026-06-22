@@ -17,5 +17,34 @@
   "showLyrics": "Afficher les paroles",
   "hideLyrics": "Masquer les paroles",
   "noLyrics": "Aucune parole disponible",
-  "unsyncedLyrics": "Paroles non synchronisées"
+  "unsyncedLyrics": "Paroles non synchronisées",
+  "equalizer": "Son",
+  "equalizerPresets": {
+    "flat": "Neutre",
+    "bassBoost": "Renfort des basses",
+    "vocalBoost": "Renfort des voix",
+    "podcast": "Podcast",
+    "nightListening": "Écoute nocturne",
+    "sleep": "Sommeil"
+  },
+  "sleepFade": "Fondu progressif (20 min)",
+  "sleepFadeDescription": "Réduit progressivement les aigus et le volume sur 20 minutes.",
+  "equalizerUnavailable": "Égaliseur indisponible pour ce flux. Le fondu de volume reste actif.",
+  "customPresets": "Personnalisés",
+  "customPresetNew": "Nouveau préréglage",
+  "customPresetDefaultName": "Mon préréglage",
+  "customPresetName": "Nom du préréglage",
+  "customPresetNamePlaceholder": "Entrer un nom",
+  "customPresetEditor": "Préréglage personnalisé",
+  "customPresetSave": "Enregistrer",
+  "customPresetCancel": "Annuler",
+  "customPresetEdit": "Modifier le préréglage",
+  "customPresetDelete": "Supprimer le préréglage",
+  "equalizerBands": {
+    "bass": "Graves",
+    "lowMid": "Médiums bas",
+    "mid": "Médiums",
+    "highMid": "Médiums hauts",
+    "treble": "Aigus"
+  }
 }

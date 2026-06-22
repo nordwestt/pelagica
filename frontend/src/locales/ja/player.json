@@ -10,5 +10,34 @@
     "showLyrics": "歌詞を表示",
     "hideLyrics": "歌詞を非表示",
     "noLyrics": "歌詞がありません",
-    "unsyncedLyrics": "同期されていない歌詞"
+    "unsyncedLyrics": "同期されていない歌詞",
+    "equalizer": "サウンド",
+    "equalizerPresets": {
+        "flat": "フラット",
+        "bassBoost": "低音ブースト",
+        "vocalBoost": "ボーカルブースト",
+        "podcast": "ポッドキャスト",
+        "nightListening": "ナイトリスニング",
+        "sleep": "スリープ"
+    },
+    "sleepFade": "段階的フェード（20分）",
+    "sleepFadeDescription": "20分かけて高音と音量を徐々に下げます。",
+    "equalizerUnavailable": "このストリームではイコライザーを使用できません。音量フェードは引き続き適用されます。",
+    "customPresets": "カスタム",
+    "customPresetNew": "新しいカスタムプリセット",
+    "customPresetDefaultName": "マイプリセット",
+    "customPresetName": "プリセット名",
+    "customPresetNamePlaceholder": "プリセット名を入力",
+    "customPresetEditor": "カスタムプリセット",
+    "customPresetSave": "保存",
+    "customPresetCancel": "キャンセル",
+    "customPresetEdit": "プリセットを編集",
+    "customPresetDelete": "プリセットを削除",
+    "equalizerBands": {
+        "bass": "低音",
+        "lowMid": "低中音",
+        "mid": "中音",
+        "highMid": "高中音",
+        "treble": "高音"
+    }
 }

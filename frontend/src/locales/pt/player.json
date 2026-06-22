@@ -10,5 +10,34 @@
     "showLyrics": "Mostrar letra",
     "hideLyrics": "Ocultar letra",
     "noLyrics": "Letra não disponível",
-    "unsyncedLyrics": "Letra não sincronizada"
+    "unsyncedLyrics": "Letra não sincronizada",
+    "equalizer": "Som",
+    "equalizerPresets": {
+        "flat": "Plano",
+        "bassBoost": "Reforço de graves",
+        "vocalBoost": "Reforço vocal",
+        "podcast": "Podcast",
+        "nightListening": "Escuta noturna",
+        "sleep": "Sono"
+    },
+    "sleepFade": "Fade gradual (20 min)",
+    "sleepFadeDescription": "Reduz gradualmente agudos e volume ao longo de 20 minutos.",
+    "equalizerUnavailable": "Equalizador indisponível para este stream. O fade de volume ainda se aplica.",
+    "customPresets": "Personalizados",
+    "customPresetNew": "Novo preset personalizado",
+    "customPresetDefaultName": "Meu preset",
+    "customPresetName": "Nome do preset",
+    "customPresetNamePlaceholder": "Digite o nome do preset",
+    "customPresetEditor": "Preset personalizado",
+    "customPresetSave": "Salvar",
+    "customPresetCancel": "Cancelar",
+    "customPresetEdit": "Editar preset",
+    "customPresetDelete": "Excluir preset",
+    "equalizerBands": {
+        "bass": "Graves",
+        "lowMid": "Médios baixos",
+        "mid": "Médios",
+        "highMid": "Médios altos",
+        "treble": "Agudos"
+    }
 }

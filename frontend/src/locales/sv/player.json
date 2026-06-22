@@ -17,5 +17,34 @@
   "showLyrics": "Visa text",
   "hideLyrics": "Dölj text",
   "noLyrics": "Ingen text tillgänglig",
-  "unsyncedLyrics": "Osynkad text"
+  "unsyncedLyrics": "Osynkad text",
+  "equalizer": "Ljud",
+  "equalizerPresets": {
+    "flat": "Platt",
+    "bassBoost": "Basförstärkning",
+    "vocalBoost": "Röstförstärkning",
+    "podcast": "Podcast",
+    "nightListening": "Nattlyssning",
+    "sleep": "Sömn"
+  },
+  "sleepFade": "Gradvis toning (20 min)",
+  "sleepFadeDescription": "Minskar gradvis diskant och volym över 20 minuter.",
+  "equalizerUnavailable": "Equalizer otillgänglig för denna ström. Volymtoning gäller fortfarande.",
+  "customPresets": "Anpassade",
+  "customPresetNew": "Nytt anpassat förval",
+  "customPresetDefaultName": "Mitt förval",
+  "customPresetName": "Förvalnamn",
+  "customPresetNamePlaceholder": "Ange förvalnamn",
+  "customPresetEditor": "Anpassat förval",
+  "customPresetSave": "Spara",
+  "customPresetCancel": "Avbryt",
+  "customPresetEdit": "Redigera förval",
+  "customPresetDelete": "Ta bort förval",
+  "equalizerBands": {
+    "bass": "Bas",
+    "lowMid": "Låg mellan",
+    "mid": "Mellan",
+    "highMid": "Hög mellan",
+    "treble": "Diskant"
+  }
 }

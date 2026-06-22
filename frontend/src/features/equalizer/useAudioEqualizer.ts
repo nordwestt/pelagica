@@ -1,0 +1,232 @@
+import { useCallback, useEffect, useRef, useState, type RefObject } from 'react';
+import {
+    SLEEP_FADE_DURATION_MS,
+    SLEEP_FADE_HIGH_SHELF_END,
+    SLEEP_FADE_HIGH_SHELF_START,
+    SLEEP_FADE_LOWPASS_END,
+    SLEEP_FADE_LOWPASS_START,
+    SLEEP_FADE_MIN_VOLUME_RATIO,
+    type EqualizerBand,
+    lerp,
+} from './presets';
+
+interface UseAudioEqualizerOptions {
+    audioRef: RefObject<HTMLAudioElement>;
+    bands: EqualizerBand[];
+    isSleepPreset: boolean;
+    sleepFadeEnabled: boolean;
+    volume: number;
+    isPlaying: boolean;
+}
+
+interface EqualizerGraph {
+    context: AudioContext;
+    source: MediaElementAudioSourceNode;
+    filters: BiquadFilterNode[];
+    sleepLowPass: BiquadFilterNode;
+    gainNode: GainNode;
+}
+
+function applyBandToFilter(filter: BiquadFilterNode, band: EqualizerBand) {
+    filter.type = band.type;
+    filter.frequency.value = band.frequency;
+    filter.gain.value = band.gain;
+    if (band.Q !== undefined) {
+        filter.Q.value = band.Q;
+    }
+}
+
+export function useAudioEqualizer({
+    audioRef,
+    bands,
+    isSleepPreset,
+    sleepFadeEnabled,
+    volume,
+    isPlaying,
+}: UseAudioEqualizerOptions) {
+    const graphRef = useRef<EqualizerGraph | null>(null);
+    const sleepFadeStartedAtRef = useRef<number | null>(null);
+    const fadeFrameRef = useRef<number | null>(null);
+    const [equalizerAvailable, setEqualizerAvailable] = useState(true);
+
+    const initGraph = useCallback(() => {
+        if (graphRef.current) return graphRef.current;
+
+        const audio = audioRef.current;
+        if (!audio) return null;
+
+        try {
+            audio.crossOrigin = 'anonymous';
+
+            const context = new AudioContext();
+            const source = context.createMediaElementSource(audio);
+            const filters = Array.from({ length: 5 }, () => context.createBiquadFilter());
+            const sleepLowPass = context.createBiquadFilter();
+            sleepLowPass.type = 'lowpass';
+            sleepLowPass.frequency.value = SLEEP_FADE_LOWPASS_START;
+            sleepLowPass.Q.value = 0.7;
+
+            const gainNode = context.createGain();
+            gainNode.gain.value = volume;
+
+            source.connect(filters[0]!);
+            for (let i = 0; i < filters.length - 1; i++) {
+                filters[i]!.connect(filters[i + 1]!);
+            }
+            filters[filters.length - 1]!.connect(sleepLowPass);
+            sleepLowPass.connect(gainNode);
+            gainNode.connect(context.destination);
+
+            audio.volume = 1;
+
+            const graph: EqualizerGraph = {
+                context,
+                source,
+                filters,
+                sleepLowPass,
+                gainNode,
+            };
+            graphRef.current = graph;
+            setEqualizerAvailable(true);
+            return graph;
+        } catch (error) {
+            console.warn('Audio equalizer unavailable, falling back to direct playback:', error);
+            setEqualizerAvailable(false);
+            return null;
+        }
+    }, [audioRef]);
+
+    const resumeContext = useCallback(async () => {
+        const graph = graphRef.current ?? initGraph();
+        if (graph && graph.context.state === 'suspended') {
+            await graph.context.resume();
+        }
+    }, [initGraph]);
+
+    const applyBands = useCallback(
+        (activeBands: EqualizerBand[], fadeProgress = 0) => {
+            const graph = graphRef.current;
+            if (!graph) return;
+
+            activeBands.forEach((band, index) => {
+                const filter = graph.filters[index];
+                if (!filter) return;
+
+                const isHighShelf = index === activeBands.length - 1 && band.type === 'highshelf';
+                if (isSleepPreset && isHighShelf && sleepFadeEnabled) {
+                    applyBandToFilter(filter, {
+                        ...band,
+                        gain: lerp(SLEEP_FADE_HIGH_SHELF_START, SLEEP_FADE_HIGH_SHELF_END, fadeProgress),
+                    });
+                } else {
+                    applyBandToFilter(filter, band);
+                }
+            });
+
+            if (isSleepPreset && sleepFadeEnabled) {
+                graph.sleepLowPass.frequency.value = lerp(
+                    SLEEP_FADE_LOWPASS_START,
+                    SLEEP_FADE_LOWPASS_END,
+                    fadeProgress
+                );
+            } else {
+                graph.sleepLowPass.type = 'lowpass';
+                graph.sleepLowPass.frequency.value = SLEEP_FADE_LOWPASS_START;
+            }
+        },
+        [isSleepPreset, sleepFadeEnabled]
+    );
+
+    const applyVolume = useCallback(
+        (fadeProgress = 0) => {
+            const graph = graphRef.current;
+            const audio = audioRef.current;
+
+            const sleepActive = isSleepPreset && sleepFadeEnabled;
+            const effectiveVolume = sleepActive
+                ? volume * lerp(1, SLEEP_FADE_MIN_VOLUME_RATIO, fadeProgress)
+                : volume;
+
+            if (graph) {
+                graph.gainNode.gain.value = effectiveVolume;
+            } else if (audio) {
+                audio.volume = effectiveVolume;
+            }
+        },
+        [audioRef, isSleepPreset, sleepFadeEnabled, volume]
+    );
+
+    const getFadeProgress = useCallback(() => {
+        if (!sleepFadeStartedAtRef.current) return 0;
+        const elapsed = Date.now() - sleepFadeStartedAtRef.current;
+        return Math.min(1, elapsed / SLEEP_FADE_DURATION_MS);
+    }, []);
+
+    const updateSleepFade = useCallback(() => {
+        const progress = getFadeProgress();
+        applyBands(bands, progress);
+        applyVolume(progress);
+    }, [applyBands, applyVolume, bands, getFadeProgress]);
+
+    const resetSleepFadeSession = useCallback(() => {
+        sleepFadeStartedAtRef.current = null;
+        if (fadeFrameRef.current !== null) {
+            cancelAnimationFrame(fadeFrameRef.current);
+            fadeFrameRef.current = null;
+        }
+    }, []);
+
+    const startSleepFadeSession = useCallback(() => {
+        sleepFadeStartedAtRef.current = Date.now();
+    }, []);
+
+    useEffect(() => {
+        initGraph();
+    }, [initGraph]);
+
+    useEffect(() => {
+        if (isSleepPreset && sleepFadeEnabled) {
+            if (sleepFadeStartedAtRef.current === null) {
+                startSleepFadeSession();
+            }
+        } else {
+            resetSleepFadeSession();
+        }
+    }, [isSleepPreset, sleepFadeEnabled, resetSleepFadeSession, startSleepFadeSession]);
+
+    useEffect(() => {
+        const progress = isSleepPreset && sleepFadeEnabled ? getFadeProgress() : 0;
+        applyBands(bands, progress);
+        applyVolume(progress);
+    }, [bands, isSleepPreset, sleepFadeEnabled, volume, applyBands, applyVolume, getFadeProgress]);
+
+    useEffect(() => {
+        if (!isPlaying || !isSleepPreset || !sleepFadeEnabled) {
+            if (fadeFrameRef.current !== null) {
+                cancelAnimationFrame(fadeFrameRef.current);
+                fadeFrameRef.current = null;
+            }
+            return;
+        }
+
+        const tick = () => {
+            updateSleepFade();
+            fadeFrameRef.current = requestAnimationFrame(tick);
+        };
+
+        fadeFrameRef.current = requestAnimationFrame(tick);
+
+        return () => {
+            if (fadeFrameRef.current !== null) {
+                cancelAnimationFrame(fadeFrameRef.current);
+                fadeFrameRef.current = null;
+            }
+        };
+    }, [isPlaying, isSleepPreset, sleepFadeEnabled, updateSleepFade]);
+
+    return {
+        equalizerAvailable,
+        resumeContext,
+        resetSleepFadeSession,
+    };
+}

@@ -1,0 +1,22 @@
+import {
+    AudioLines,
+    Mic2,
+    Moon,
+    MoonStar,
+    Podcast,
+    SlidersHorizontal,
+    Volume1,
+    type LucideIcon,
+} from 'lucide-react';
+import type { BuiltInEqualizerPresetId } from './presets';
+
+export const BUILT_IN_PRESET_ICONS: Record<BuiltInEqualizerPresetId, LucideIcon> = {
+    flat: AudioLines,
+    bassBoost: Volume1,
+    vocalBoost: Mic2,
+    podcast: Podcast,
+    nightListening: Moon,
+    sleep: MoonStar,
+};
+
+export const CUSTOM_PRESET_ICON = SlidersHorizontal;

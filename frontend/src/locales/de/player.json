@@ -17,5 +17,34 @@
   "showLyrics": "Songtext anzeigen",
   "hideLyrics": "Songtext ausblenden",
   "noLyrics": "Kein Songtext verfügbar",
-  "unsyncedLyrics": "Nicht synchronisierter Songtext"
+  "unsyncedLyrics": "Nicht synchronisierter Songtext",
+  "equalizer": "Klang",
+  "equalizerPresets": {
+    "flat": "Neutral",
+    "bassBoost": "Bass-Boost",
+    "vocalBoost": "Gesang-Boost",
+    "podcast": "Podcast",
+    "nightListening": "Nachtmodus",
+    "sleep": "Schlafmodus"
+  },
+  "sleepFade": "Allmähliches Ausblenden (20 Min.)",
+  "sleepFadeDescription": "Reduziert allmählich Höhen und Lautstärke über 20 Minuten.",
+  "equalizerUnavailable": "Equalizer für diesen Stream nicht verfügbar. Lautstärke-Ausblendung funktioniert weiterhin.",
+  "customPresets": "Eigene",
+  "customPresetNew": "Neues Preset",
+  "customPresetDefaultName": "Mein Preset",
+  "customPresetName": "Preset-Name",
+  "customPresetNamePlaceholder": "Preset-Namen eingeben",
+  "customPresetEditor": "Eigenes Preset",
+  "customPresetSave": "Speichern",
+  "customPresetCancel": "Abbrechen",
+  "customPresetEdit": "Preset bearbeiten",
+  "customPresetDelete": "Preset löschen",
+  "equalizerBands": {
+    "bass": "Bass",
+    "lowMid": "Untere Mitten",
+    "mid": "Mitten",
+    "highMid": "Obere Mitten",
+    "treble": "Höhen"
+  }
 }

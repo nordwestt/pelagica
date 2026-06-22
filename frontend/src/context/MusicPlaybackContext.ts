@@ -1,4 +1,8 @@
 import { createContext } from 'react';
+import type {
+    CustomEqualizerPreset,
+    EqualizerSelection,
+} from '@/features/equalizer/presets';
 
 export interface MusicPlaybackTrack {
     id: string;
@@ -22,6 +26,14 @@ export interface MusicPlaybackContextType {
 
     volume: number;
     setVolume: (volume: number) => void;
+    equalizerPreset: EqualizerSelection;
+    setEqualizerPreset: (preset: EqualizerSelection) => void;
+    customEqualizerPresets: CustomEqualizerPreset[];
+    saveCustomEqualizerPreset: (preset: CustomEqualizerPreset) => void;
+    deleteCustomEqualizerPreset: (id: string) => void;
+    sleepFadeEnabled: boolean;
+    setSleepFadeEnabled: (enabled: boolean) => void;
+    equalizerAvailable: boolean;
     shuffle: boolean;
     toggleShuffle: () => void;
     repeat: boolean;

@@ -17,5 +17,34 @@
     "showLyrics": "Show lyrics",
     "hideLyrics": "Hide lyrics",
     "noLyrics": "No lyrics available",
-    "unsyncedLyrics": "Unsynced lyrics"
+    "unsyncedLyrics": "Unsynced lyrics",
+    "equalizer": "Sound",
+    "equalizerPresets": {
+        "flat": "Flat",
+        "bassBoost": "Bass Boost",
+        "vocalBoost": "Vocal Boost",
+        "podcast": "Podcast",
+        "nightListening": "Night Listening",
+        "sleep": "Sleep"
+    },
+    "sleepFade": "Gradual fade (20 min)",
+    "sleepFadeDescription": "Gradually reduces highs and volume over 20 minutes.",
+    "equalizerUnavailable": "Equalizer unavailable for this stream. Volume fade still applies.",
+    "customPresets": "Custom",
+    "customPresetNew": "New custom preset",
+    "customPresetDefaultName": "My preset",
+    "customPresetName": "Preset name",
+    "customPresetNamePlaceholder": "Enter preset name",
+    "customPresetEditor": "Custom preset",
+    "customPresetSave": "Save",
+    "customPresetCancel": "Cancel",
+    "customPresetEdit": "Edit preset",
+    "customPresetDelete": "Delete preset",
+    "equalizerBands": {
+        "bass": "Bass",
+        "lowMid": "Low mid",
+        "mid": "Mid",
+        "highMid": "High mid",
+        "treble": "Treble"
+    }
 }
