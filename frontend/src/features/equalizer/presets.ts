@@ -2,7 +2,7 @@ export const EQUALIZER_PRESET_STORAGE_KEY = 'music_equalizer_preset';
 export const SLEEP_FADE_STORAGE_KEY = 'music_sleep_fade_enabled';
 export const CUSTOM_PRESETS_STORAGE_KEY = 'music_equalizer_custom_presets';
 
-export const SLEEP_FADE_DURATION_MS = 1 * 60 * 1000;
+export const SLEEP_FADE_DURATION_MS = 20 * 60 * 1000;
 export const CUSTOM_PRESET_GAIN_MIN = -12;
 export const CUSTOM_PRESET_GAIN_MAX = 12;
 
