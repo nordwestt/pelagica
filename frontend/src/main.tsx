@@ -33,7 +33,6 @@ const MusicMainContent = lazy(() => import('./pages/Music/MusicMainContent.tsx')
 const MusicAlbumView = lazy(() => import('./pages/Music/MusicAlbumView.tsx'));
 const MusicPlaylistView = lazy(() => import('./pages/Music/MusicPlaylistView.tsx'));
 const MusicArtistView = lazy(() => import('./pages/Music/MusicArtistView.tsx'));
-const GenrePage = lazy(() => import('./pages/Genre/GenrePage.tsx'));
 
 const queryClient = new QueryClient();
 
