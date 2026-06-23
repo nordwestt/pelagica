@@ -153,105 +153,111 @@ export const SearchCommand = () => {
                     </>
                 ) : results && results.length > 0 ? (
                     <>
-                        {results.map((item) => (
-                            <CommandItem
-                                key={item.Id}
-                                value={item.Name!}
-                                onSelect={() => {
-                                    if (item.Type === 'Audio') {
-                                        loadTrack(
-                                            {
-                                                id: item.Id || '',
-                                                title: item.Name || '',
-                                                artist:
-                                                    item.ArtistItems?.[0]?.Name ||
-                                                    item.Artists?.[0] ||
-                                                    'Unknown',
-                                                albumId: item.AlbumId || item.ParentId || '',
-                                                albumName: item.Album || '',
-                                            },
-                                            true
-                                        );
-                                        closeSearch();
-                                    } else {
-                                        navigate(getItemUrl(item.Type, item.Id));
-                                        closeSearch();
-                                    }
-                                }}
-                            >
-                                <div className="flex items-start gap-3 w-full">
-                                    <div
-                                        className={`relative overflow-hidden rounded-md shrink-0 ${
-                                            item.Type === 'MusicAlbum' || item.Type === 'Audio'
-                                                ? 'w-13 h-13'
-                                                : 'w-13 h-20'
-                                        }`}
-                                    >
-                                        <img
-                                            src={posterUrls[item.Id!]}
-                                            alt={item.Name || ''}
-                                            className="w-full h-full object-cover rounded-md"
-                                            loading="lazy"
-                                        />
-                                        <Skeleton className="absolute bottom-0 left-0 right-0 top-0 -z-1" />
-                                    </div>
-                                    <div className="flex flex-col justify-start min-w-0 flex-1">
-                                        <div className="flex items-center">
-                                            <p className="text-lg line-clamp-1 text-ellipsis break-all">
-                                                {item.Name || ''}
-                                            </p>
-                                            <Badge variant={'outline'} className="flex ml-2">
-                                                <JellyfinItemKindIcon kind={item.Type!} />
-                                                {item.Type === 'Audio'
-                                                    ? t('song')
-                                                    : item.Type === 'MusicAlbum'
-                                                      ? t('album')
-                                                      : item.Type}
-                                            </Badge>
+                        {results.map((item) => {
+                            const posterClass =
+                                item.Type === 'MusicAlbum' ||
+                                item.Type === 'Audio' ||
+                                item.Type === 'Person' ||
+                                item.Type === 'MusicArtist'
+                                    ? 'w-13 h-13'
+                                    : 'w-13 h-20';
+
+                            return (
+                                <CommandItem
+                                    key={item.Id}
+                                    value={item.Name!}
+                                    onSelect={() => {
+                                        if (item.Type === 'Audio') {
+                                            loadTrack(
+                                                {
+                                                    id: item.Id || '',
+                                                    title: item.Name || '',
+                                                    artist:
+                                                        item.ArtistItems?.[0]?.Name ||
+                                                        item.Artists?.[0] ||
+                                                        'Unknown',
+                                                    albumId: item.AlbumId || item.ParentId || '',
+                                                    albumName: item.Album || '',
+                                                },
+                                                true
+                                            );
+                                            closeSearch();
+                                        } else {
+                                            navigate(getItemUrl(item.Type, item.Id));
+                                            closeSearch();
+                                        }
+                                    }}
+                                >
+                                    <div className="flex items-start gap-3 w-full">
+                                        <div
+                                            className={`relative overflow-hidden shrink-0 ${posterClass}`}
+                                        >
+                                            <img
+                                                src={posterUrls[item.Id!]}
+                                                alt={item.Name || ''}
+                                                className="w-full h-full object-cover rounded-md"
+                                                loading="lazy"
+                                            />
+                                            <Skeleton className="absolute bottom-0 left-0 right-0 top-0 -z-1" />
                                         </div>
-                                        <div className="flex items-center gap-3 mt-1 text-xs text-muted-foreground">
-                                            {item.Type === 'MusicAlbum' || item.Type === 'Audio' ? (
-                                                <>
-                                                    {item.Artists && item.Artists.length > 0 && (
-                                                        <span className="line-clamp-1">
-                                                            {item.Artists.join(', ')}
-                                                        </span>
-                                                    )}
-                                                    {item.ProductionYear && (
-                                                        <div className="flex items-center gap-1">
-                                                            <Calendar className="h-3! w-3!" />
-                                                            <span>{item.ProductionYear}</span>
-                                                        </div>
-                                                    )}
-                                                </>
-                                            ) : (
-                                                <>
-                                                    {item.ProductionYear && (
-                                                        <div className="flex items-center gap-1">
-                                                            <Calendar className="h-3! w-3!" />
-                                                            <span>{item.ProductionYear}</span>
-                                                        </div>
-                                                    )}
-                                                    {item.CommunityRating && (
-                                                        <div className="flex items-center gap-1">
-                                                            <Star className="h-3! w-3!" />
-                                                            <span>
-                                                                {item.CommunityRating.toFixed(1)}
-                                                            </span>
-                                                        </div>
-                                                    )}
-                                                </>
+                                        <div className="flex flex-col justify-start min-w-0 flex-1">
+                                            <div className="flex items-center">
+                                                <p className="text-lg line-clamp-1 text-ellipsis break-all">
+                                                    {item.Name || ''}
+                                                </p>
+                                                <Badge variant={'outline'} className="flex ml-2">
+                                                    <JellyfinItemKindIcon kind={item.Type!} />
+                                                    {t('itemtype_' + item.Type?.toLowerCase())}
+                                                </Badge>
+                                            </div>
+                                            <div className="flex items-center gap-3 mt-1 text-xs text-muted-foreground">
+                                                {item.Type === 'MusicAlbum' ||
+                                                item.Type === 'Audio' ? (
+                                                    <>
+                                                        {item.Artists &&
+                                                            item.Artists.length > 0 && (
+                                                                <span className="line-clamp-1">
+                                                                    {item.Artists.join(', ')}
+                                                                </span>
+                                                            )}
+                                                        {item.ProductionYear && (
+                                                            <div className="flex items-center gap-1">
+                                                                <Calendar className="h-3! w-3!" />
+                                                                <span>{item.ProductionYear}</span>
+                                                            </div>
+                                                        )}
+                                                    </>
+                                                ) : (
+                                                    <>
+                                                        {item.ProductionYear && (
+                                                            <div className="flex items-center gap-1">
+                                                                <Calendar className="h-3! w-3!" />
+                                                                <span>{item.ProductionYear}</span>
+                                                            </div>
+                                                        )}
+                                                        {item.CommunityRating && (
+                                                            <div className="flex items-center gap-1">
+                                                                <Star className="h-3! w-3!" />
+                                                                <span>
+                                                                    {item.CommunityRating.toFixed(
+                                                                        1
+                                                                    )}
+                                                                </span>
+                                                            </div>
+                                                        )}
+                                                    </>
+                                                )}
+                                            </div>
+                                            {item.Overview && item.Type !== 'MusicAlbum' && (
+                                                <p className="text-xs text-muted-foreground line-clamp-1 mt-2">
+                                                    {item.Overview}
+                                                </p>
                                             )}
                                         </div>
-                                        {item.Overview && item.Type !== 'MusicAlbum' && (
-                                            <p className="text-xs text-muted-foreground line-clamp-1 mt-2">
-                                                {item.Overview}
-                                            </p>
-                                        )}
                                     </div>
-                                </div>
-                            </CommandItem>
-                        ))}
+                                </CommandItem>
+                            );
+                        })}
                     </>
                 ) : (
                     <CommandEmpty>{t('no_results')}</CommandEmpty>
