@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, forwardRef } from 'react';
 import { Link } from 'react-router';
 import { Search, Play, X } from 'lucide-react';
 import { Input } from '@/components/ui/input';
@@ -21,19 +21,21 @@ import {
 import { usePlaylists } from '@/hooks/api/playlist/usePlaylists';
 import { useCurrentUser } from '@/hooks/api/useCurrentUser';
 import SectionScroller from '@/components/SectionScroller';
+import MusicItemContextMenu from '@/components/MusicItemContextMenu';
+import { toPlaybackTracks } from '@/utils/musicPlaybackTrack';
 import type { BaseItemDto } from '@jellyfin/sdk/lib/generated-client/models';
 
-const SongRow = ({
-    song,
-    onPlay,
-    showAlbum = false,
-}: {
-    song: BaseItemDto;
-    index: number;
-    onPlay: () => void;
-    showAlbum?: boolean;
-}) => (
+const SongRow = forwardRef<
+    HTMLDivElement,
+    {
+        song: BaseItemDto;
+        index: number;
+        onPlay: () => void;
+        showAlbum?: boolean;
+    }
+>(({ song, onPlay, showAlbum = false }, ref) => (
     <div
+        ref={ref}
         className="flex items-center gap-3 px-3 py-2 hover:bg-accent/50 rounded-md cursor-pointer group transition-colors"
         onClick={onPlay}
     >
@@ -69,7 +71,8 @@ const SongRow = ({
             </span>
         )}
     </div>
-);
+));
+SongRow.displayName = 'SongRow';
 
 const SongList = ({
     songs,
@@ -84,15 +87,10 @@ const SongList = ({
 }) => {
     const { loadQueue } = useMusicPlayback();
 
-    const handlePlay = (songs: BaseItemDto[], index: number) => {
-        const queue = songs.map((s) => ({
-            id: s.Id || '',
-            title: s.Name || '',
-            artist: s.ArtistItems?.[0]?.Name || 'Unknown',
-            albumId: s.AlbumId || '',
-            albumName: s.Album || '',
-        }));
-        loadQueue(queue, index, true);
+    const playbackTracks = songs ? toPlaybackTracks(songs) : [];
+
+    const handlePlay = (index: number) => {
+        loadQueue(playbackTracks, index, true);
     };
 
     if (isLoading) {
@@ -112,13 +110,20 @@ const SongList = ({
     return (
         <div className="flex flex-col gap-0.5">
             {songs.map((song, index) => (
-                <SongRow
+                <MusicItemContextMenu
                     key={song.Id}
-                    song={song}
-                    index={index}
-                    showAlbum={showAlbum}
-                    onPlay={() => handlePlay(songs, index)}
-                />
+                    item={song}
+                    kind="song"
+                    contextTracks={playbackTracks}
+                    startIndex={index}
+                >
+                    <SongRow
+                        song={song}
+                        index={index}
+                        showAlbum={showAlbum}
+                        onPlay={() => handlePlay(index)}
+                    />
+                </MusicItemContextMenu>
             ))}
         </div>
     );
@@ -184,17 +189,18 @@ const AlbumsGrid = ({
     return (
         <div className="grid grid-cols-[repeat(auto-fill,minmax(160px,1fr))] gap-4">
             {albums.map((album) => (
-                <Link
-                    key={album.Id}
-                    to={getItemUrl(album.Type, album.Id)}
-                    className="group flex flex-col"
-                >
-                    <AlbumCover album={album} />
-                    <span className="text-sm mt-2 truncate">{album.Name}</span>
-                    <span className="text-xs text-muted-foreground truncate">
-                        {album.ArtistItems?.[0]?.Name || album.AlbumArtist || ''}
-                    </span>
-                </Link>
+                <MusicItemContextMenu key={album.Id} item={album} kind="album">
+                    <Link
+                        to={getItemUrl(album.Type, album.Id)}
+                        className="group flex flex-col"
+                    >
+                        <AlbumCover album={album} />
+                        <span className="text-sm mt-2 truncate">{album.Name}</span>
+                        <span className="text-xs text-muted-foreground truncate">
+                            {album.ArtistItems?.[0]?.Name || album.AlbumArtist || ''}
+                        </span>
+                    </Link>
+                </MusicItemContextMenu>
             ))}
         </div>
     );
@@ -354,15 +360,10 @@ const SearchResults = ({ searchTerm }: { searchTerm: string }) => {
     const albums = results.filter((r) => r.Type === 'MusicAlbum');
     const artists = results.filter((r) => r.Type === 'MusicArtist');
 
+    const songPlaybackTracks = toPlaybackTracks(songs);
+
     const handlePlaySong = (index: number) => {
-        const queue = songs.map((s) => ({
-            id: s.Id || '',
-            title: s.Name || '',
-            artist: s.ArtistItems?.[0]?.Name || 'Unknown',
-            albumId: s.AlbumId || '',
-            albumName: s.Album || '',
-        }));
-        loadQueue(queue, index, true);
+        loadQueue(songPlaybackTracks, index, true);
     };
 
     return (
@@ -402,26 +403,27 @@ const SearchResults = ({ searchTerm }: { searchTerm: string }) => {
                     </h3>
                     <div className="flex gap-4 overflow-x-auto">
                         {albums.map((album) => (
-                            <Link
-                                key={album.Id}
-                                to={getItemUrl(album.Type, album.Id)}
-                                className="flex flex-col shrink-0 group"
-                            >
-                                <img
-                                    src={getPrimaryImageUrl(album.Id || '', {
-                                        width: 200,
-                                        height: 200,
-                                    })}
-                                    alt={album.Name || ''}
-                                    className="w-32 h-32 rounded-md object-cover group-hover:opacity-75 transition-opacity"
-                                />
-                                <span className="text-sm mt-1.5 truncate max-w-32">
-                                    {album.Name}
-                                </span>
-                                <span className="text-xs text-muted-foreground truncate max-w-32">
-                                    {album.ArtistItems?.[0]?.Name}
-                                </span>
-                            </Link>
+                            <MusicItemContextMenu key={album.Id} item={album} kind="album">
+                                <Link
+                                    to={getItemUrl(album.Type, album.Id)}
+                                    className="flex flex-col shrink-0 group"
+                                >
+                                    <img
+                                        src={getPrimaryImageUrl(album.Id || '', {
+                                            width: 200,
+                                            height: 200,
+                                        })}
+                                        alt={album.Name || ''}
+                                        className="w-32 h-32 rounded-md object-cover group-hover:opacity-75 transition-opacity"
+                                    />
+                                    <span className="text-sm mt-1.5 truncate max-w-32">
+                                        {album.Name}
+                                    </span>
+                                    <span className="text-xs text-muted-foreground truncate max-w-32">
+                                        {album.ArtistItems?.[0]?.Name}
+                                    </span>
+                                </Link>
+                            </MusicItemContextMenu>
                         ))}
                     </div>
                 </div>
@@ -433,13 +435,20 @@ const SearchResults = ({ searchTerm }: { searchTerm: string }) => {
                     </h3>
                     <div className="flex flex-col gap-0.5">
                         {songs.map((song, index) => (
-                            <SongRow
+                            <MusicItemContextMenu
                                 key={song.Id}
-                                song={song}
-                                index={index}
-                                showAlbum
-                                onPlay={() => handlePlaySong(index)}
-                            />
+                                item={song}
+                                kind="song"
+                                contextTracks={songPlaybackTracks}
+                                startIndex={index}
+                            >
+                                <SongRow
+                                    song={song}
+                                    index={index}
+                                    showAlbum
+                                    onPlay={() => handlePlaySong(index)}
+                                />
+                            </MusicItemContextMenu>
                         ))}
                     </div>
                 </div>
@@ -500,29 +509,30 @@ const MusicMainContent = () => {
                                 </h2>
                             }
                             items={recentAlbums.map((album) => (
-                                <Link
-                                    key={album.Id}
-                                    to={getItemUrl(album.Type, album.Id)}
-                                    className="group flex flex-col shrink-0"
-                                >
-                                    <div className="relative w-36 h-36 overflow-hidden rounded-md">
-                                        <img
-                                            src={getPrimaryImageUrl(album.Id || '', {
-                                                width: 288,
-                                                height: 288,
-                                            })}
-                                            alt={album.Name || ''}
-                                            className="w-36 h-36 object-cover group-hover:opacity-75 group-hover:scale-105 transition-all transform-gpu"
-                                            loading="lazy"
-                                        />
-                                    </div>
-                                    <span className="text-sm mt-1.5 truncate max-w-36">
-                                        {album.Name}
-                                    </span>
-                                    <span className="text-xs text-muted-foreground truncate max-w-36">
-                                        {album.ArtistItems?.[0]?.Name || album.AlbumArtist || ''}
-                                    </span>
-                                </Link>
+                                <MusicItemContextMenu key={album.Id} item={album} kind="album">
+                                    <Link
+                                        to={getItemUrl(album.Type, album.Id)}
+                                        className="group flex flex-col shrink-0"
+                                    >
+                                        <div className="relative w-36 h-36 overflow-hidden rounded-md">
+                                            <img
+                                                src={getPrimaryImageUrl(album.Id || '', {
+                                                    width: 288,
+                                                    height: 288,
+                                                })}
+                                                alt={album.Name || ''}
+                                                className="w-36 h-36 object-cover group-hover:opacity-75 group-hover:scale-105 transition-all transform-gpu"
+                                                loading="lazy"
+                                            />
+                                        </div>
+                                        <span className="text-sm mt-1.5 truncate max-w-36">
+                                            {album.Name}
+                                        </span>
+                                        <span className="text-xs text-muted-foreground truncate max-w-36">
+                                            {album.ArtistItems?.[0]?.Name || album.AlbumArtist || ''}
+                                        </span>
+                                    </Link>
+                                </MusicItemContextMenu>
                             ))}
                         />
                     )}
