@@ -27,5 +27,7 @@
     "add_to": "Add to...",
     "queue_start": "Start of queue",
     "queue_end": "End of queue",
-    "playlist": "Playlist"
+    "playlist": "Playlist",
+    "search_playlists": "Search playlists...",
+    "create_and_add": "Create & Add"
 }
