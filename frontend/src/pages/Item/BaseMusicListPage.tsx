@@ -234,9 +234,7 @@ const BaseMusicListPage = ({
                                             index={index}
                                             contextTracks={playbackTracks}
                                             onPlay={() => handleTrackPlay(index)}
-                                            trailing={
-                                                <TrackMediaInfoButton track={track} t={t} />
-                                            }
+                                            trailing={<TrackMediaInfoButton track={track} t={t} />}
                                         />
                                     );
                                 })}

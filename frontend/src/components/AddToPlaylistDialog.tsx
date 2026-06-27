@@ -1,12 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Check, ListMusic, Loader2, Plus } from 'lucide-react';
-import {
-    Dialog,
-    DialogContent,
-    DialogHeader,
-    DialogTitle,
-} from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import {
@@ -32,9 +27,11 @@ export function AddToPlaylistDialog({ open, onOpenChange, itemIds }: AddToPlayli
     const { t } = useTranslation('item');
     const { t: tMusic } = useTranslation('music');
     const { data: currentUser } = useCurrentUser();
-    const { data: playlists, isLoading: isLoadingPlaylists, refetch } = usePlaylists(
-        currentUser?.Id
-    );
+    const {
+        data: playlists,
+        isLoading: isLoadingPlaylists,
+        refetch,
+    } = usePlaylists(currentUser?.Id);
     const addToPlaylist = useAddToPlaylist();
     const createPlaylist = useCreatePlaylist();
 
@@ -198,7 +195,9 @@ export function AddToPlaylistDialog({ open, onOpenChange, itemIds }: AddToPlayli
                                 <Button
                                     size="sm"
                                     onClick={handleCreateAndAdd}
-                                    disabled={!playlistName.trim() || isBusy || itemIds.length === 0}
+                                    disabled={
+                                        !playlistName.trim() || isBusy || itemIds.length === 0
+                                    }
                                 >
                                     {createPlaylist.isPending ? (
                                         <Loader2 className="size-4 animate-spin" />

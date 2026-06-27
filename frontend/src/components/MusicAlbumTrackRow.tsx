@@ -63,12 +63,7 @@ const MusicAlbumTrackRow = ({
     className,
     ...props
 }: MusicAlbumTrackRowProps & ComponentPropsWithoutRef<'div'>) => (
-    <MusicItemContextMenu
-        item={track}
-        kind="song"
-        contextTracks={contextTracks}
-        startIndex={index}
-    >
+    <MusicItemContextMenu item={track} kind="song" contextTracks={contextTracks} startIndex={index}>
         <MusicAlbumTrackRowTrigger
             track={track}
             onPlay={onPlay}

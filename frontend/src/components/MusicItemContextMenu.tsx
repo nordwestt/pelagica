@@ -9,15 +9,7 @@ import {
     ContextMenuSubTrigger,
     ContextMenuTrigger,
 } from '@/components/ui/context-menu';
-import {
-    Heart,
-    ListEnd,
-    ListMusic,
-    ListPlus,
-    ListStart,
-    Play,
-    Shuffle,
-} from 'lucide-react';
+import { Heart, ListEnd, ListMusic, ListPlus, ListStart, Play, Shuffle } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { useMusicPlayback } from '@/hooks/useMusicPlayback';
 import { useFavorite } from '@/hooks/api/useFavorite';
@@ -71,8 +63,7 @@ const MusicItemContextMenu = ({
     const actionsDisabled =
         kind === 'album' ? isLoadingAlbumTracks || tracks.length === 0 : tracks.length === 0;
 
-    const playlistDisabled =
-        actionsDisabled || (kind === 'album' && playlistItemIds.length === 0);
+    const playlistDisabled = actionsDisabled || (kind === 'album' && playlistItemIds.length === 0);
 
     const handlePlayNow = () => {
         loadQueue(tracks, startIndex, true);
