@@ -31,6 +31,7 @@
     "sleepFadeDuration": "Fade duration",
     "sleepFadeDurationUnit": "min",
     "sleepFadeStart": "Start timer",
+    "sleepFadeStartRequiresPlayback": "Start playing music to begin the sleep timer.",
     "sleepFadeStop": "Stop timer",
     "sleepFadeRemaining": "{{time}} remaining",
     "sleepFadeBack": "Back to presets",

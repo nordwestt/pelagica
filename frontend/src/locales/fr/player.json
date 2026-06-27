@@ -31,6 +31,7 @@
   "sleepFadeDuration": "Durée du fondu",
   "sleepFadeDurationUnit": "min",
   "sleepFadeStart": "Démarrer le minuteur",
+  "sleepFadeStartRequiresPlayback": "Lancez la lecture pour démarrer le minuteur de sommeil.",
   "sleepFadeStop": "Arrêter le minuteur",
   "sleepFadeRemaining": "{{time}} restantes",
   "sleepFadeBack": "Retour aux préréglages",

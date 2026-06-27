@@ -31,6 +31,7 @@
   "sleepFadeDuration": "Toningstid",
   "sleepFadeDurationUnit": "min",
   "sleepFadeStart": "Starta timer",
+  "sleepFadeStartRequiresPlayback": "Starta uppspelningen för att starta sömntimern.",
   "sleepFadeStop": "Stoppa timer",
   "sleepFadeRemaining": "{{time}} kvar",
   "sleepFadeBack": "Tillbaka till förval",

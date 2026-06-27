@@ -24,6 +24,7 @@
     "sleepFadeDuration": "フェード時間",
     "sleepFadeDurationUnit": "分",
     "sleepFadeStart": "タイマー開始",
+    "sleepFadeStartRequiresPlayback": "スリープタイマーを開始するには再生を開始してください。",
     "sleepFadeStop": "タイマー停止",
     "sleepFadeRemaining": "残り {{time}}",
     "sleepFadeBack": "プリセットに戻る",

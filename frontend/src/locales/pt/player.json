@@ -24,6 +24,7 @@
     "sleepFadeDuration": "Duração do fade",
     "sleepFadeDurationUnit": "min",
     "sleepFadeStart": "Iniciar timer",
+    "sleepFadeStartRequiresPlayback": "Inicie a reprodução para começar o timer de sono.",
     "sleepFadeStop": "Parar timer",
     "sleepFadeRemaining": "{{time}} restantes",
     "sleepFadeBack": "Voltar aos presets",

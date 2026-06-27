@@ -16,6 +16,7 @@ interface SleepModePanelProps {
     activeDurationMinutes: number;
     isRunning: boolean;
     sleepFadeStartedAt: number | null;
+    isPlaying: boolean;
     onDurationChange: (minutes: number) => void;
     onStart: () => void;
     onStop: () => void;
@@ -27,6 +28,7 @@ const SleepModePanel = ({
     activeDurationMinutes,
     isRunning,
     sleepFadeStartedAt,
+    isPlaying,
     onDurationChange,
     onStart,
     onStop,
@@ -43,6 +45,7 @@ const SleepModePanel = ({
     );
     const remainingLabel =
         remainingMs !== null ? formatSleepFadeRemaining(remainingMs) : null;
+    const canStart = isPlaying;
 
     return (
         <div className="space-y-4">
@@ -122,13 +125,19 @@ const SleepModePanel = ({
                             size="icon"
                             className="ml-auto shrink-0"
                             onClick={onStart}
+                            disabled={!canStart}
                             aria-label={t('sleepFadeStart')}
-                            title={t('sleepFadeStart')}
+                            title={
+                                canStart ? t('sleepFadeStart') : t('sleepFadeStartRequiresPlayback')
+                            }
                         >
                             <Play className="size-4" />
                         </Button>
                     )}
                 </div>
+                {!isRunning && !canStart && (
+                    <p className="text-xs text-muted-foreground">{t('sleepFadeStartRequiresPlayback')}</p>
+                )}
             </div>
         </div>
     );
