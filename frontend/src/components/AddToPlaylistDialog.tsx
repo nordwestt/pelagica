@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Check, ListMusic, Loader2, Plus } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
@@ -40,14 +40,19 @@ export function AddToPlaylistDialog({ open, onOpenChange, itemIds }: AddToPlayli
     const [addingToId, setAddingToId] = useState<string | null>(null);
     const [addedToId, setAddedToId] = useState<string | null>(null);
 
-    useEffect(() => {
-        if (!open) {
-            setShowCreate(false);
-            setPlaylistName('');
-            setAddingToId(null);
-            setAddedToId(null);
+    const resetForm = () => {
+        setShowCreate(false);
+        setPlaylistName('');
+        setAddingToId(null);
+        setAddedToId(null);
+    };
+
+    const handleOpenChange = (nextOpen: boolean) => {
+        if (!nextOpen) {
+            resetForm();
         }
-    }, [open]);
+        onOpenChange(nextOpen);
+    };
 
     const handleAddToPlaylist = async (playlistId: string) => {
         if (itemIds.length === 0 || addingToId) return;
@@ -60,7 +65,7 @@ export function AddToPlaylistDialog({ open, onOpenChange, itemIds }: AddToPlayli
                 userId: currentUser?.Id,
             });
             setAddedToId(playlistId);
-            setTimeout(() => onOpenChange(false), 400);
+            setTimeout(() => handleOpenChange(false), 400);
         } catch (error) {
             console.error('Error adding to playlist:', error);
         } finally {
@@ -87,7 +92,7 @@ export function AddToPlaylistDialog({ open, onOpenChange, itemIds }: AddToPlayli
             setPlaylistName('');
             setShowCreate(false);
             await refetch();
-            onOpenChange(false);
+            handleOpenChange(false);
         } catch (error) {
             console.error('Error creating playlist:', error);
         }
@@ -102,7 +107,7 @@ export function AddToPlaylistDialog({ open, onOpenChange, itemIds }: AddToPlayli
     const isBusy = addToPlaylist.isPending || createPlaylist.isPending;
 
     return (
-        <Dialog open={open} onOpenChange={onOpenChange}>
+        <Dialog open={open} onOpenChange={handleOpenChange}>
             <DialogContent className="sm:max-w-md gap-0 p-0 overflow-hidden">
                 <DialogHeader className="px-4 pt-4 pb-2">
                     <DialogTitle>{t('add_to_playlist')}</DialogTitle>
