@@ -141,8 +141,12 @@ const MediaBar = ({
                                                 src={getLogoUrl(
                                                     item.Id!,
                                                     {
-                                                        fillWidth: Math.ceil(672 * window.devicePixelRatio),
-                                                        fillHeight: Math.ceil(288 * window.devicePixelRatio),
+                                                        fillWidth: Math.ceil(
+                                                            672 * window.devicePixelRatio
+                                                        ),
+                                                        fillHeight: Math.ceil(
+                                                            288 * window.devicePixelRatio
+                                                        ),
                                                     },
                                                     item.ImageTags?.Logo
                                                 )}
