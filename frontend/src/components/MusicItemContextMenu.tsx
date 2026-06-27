@@ -158,3 +158,19 @@ const MusicItemContextMenu = ({
 };
 
 export default MusicItemContextMenu;
+
+export function MusicAlbumContextMenuWrapper({
+    item,
+    children,
+}: {
+    item?: BaseItemDto;
+    children: React.ReactNode;
+}) {
+    if (item?.Type !== 'MusicAlbum') return children;
+
+    return (
+        <MusicItemContextMenu item={item} kind="album">
+            {children}
+        </MusicItemContextMenu>
+    );
+}
