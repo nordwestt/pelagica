@@ -558,21 +558,21 @@ const TopBar = ({ overlay = false }: { overlay?: boolean }) => {
     const validLinks = config?.links?.filter((l) => l.url && l.text) ?? [];
 
     return (
-        <header className="fixed top-0 z-50 w-full">
+        <header className="fixed top-0 z-50 w-full flex justify-center pointer-events-none">
             {overlay && !scrolled && (
-                <div className="absolute inset-0 -bottom-5 bg-linear-to-b from-background/70 to-transparent pointer-events-none" />
+                <div className="absolute inset-0 -bottom-5 bg-linear-to-b from-background/70 to-transparent" />
             )}
 
             <div
                 className={cn(
-                    'relative flex h-14 items-center gap-2 px-4 sm:px-12 transition-all duration-300 border-b',
+                    'pointer-events-auto relative flex h-11 items-center gap-2 px-2 sm:px-4 mt-3 rounded-full transition-all duration-300 border',
                     !overlay || scrolled
-                        ? 'border-border bg-background/60 backdrop-blur'
-                        : 'border-transparent'
+                        ? 'border-border bg-background/60 backdrop-blur shadow-sm'
+                        : 'border-white/10 bg-background/20 backdrop-blur-md'
                 )}
             >
                 {/* Logo */}
-                <Link to="/" className="flex items-center gap-2 shrink-0 mr-2">
+                <Link to="/" className="flex items-center gap-2 shrink-0">
                     <Avatar className="h-7 w-7 p-0.5 rounded-md">
                         <AvatarImage src={logoSrc} alt="logo" />
                         <AvatarFallback className="rounded-md text-xs">PE</AvatarFallback>
@@ -640,8 +640,6 @@ const TopBar = ({ overlay = false }: { overlay?: boolean }) => {
                     ))}
                 </nav>
 
-                <div className="flex-1" />
-
                 {/* User menu */}
                 <UserMenu />
 
@@ -659,7 +657,7 @@ const TopBar = ({ overlay = false }: { overlay?: boolean }) => {
 
             {/* Mobile nav drawer */}
             {mobileOpen && (
-                <div className="md:hidden border-t px-3 py-2 flex flex-col gap-0.5 bg-background">
+                <div className="pointer-events-auto md:hidden mx-auto mt-1 px-3 py-2 flex flex-col gap-0.5 bg-background/60 backdrop-blur border border-border rounded-2xl shadow-sm w-fit min-w-48">
                     <Button
                         asChild
                         variant="ghost"
