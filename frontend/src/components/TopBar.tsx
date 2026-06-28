@@ -621,6 +621,7 @@ const TopBar = ({ overlay = false }: { overlay?: boolean }) => {
                                         'noopener,noreferrer'
                                     )
                                 }
+                                className="cursor-pointer"
                             >
                                 <ChartLine className="h-4 w-4" />
                                 Streamystats
@@ -635,6 +636,7 @@ const TopBar = ({ overlay = false }: { overlay?: boolean }) => {
                                 onClick={() =>
                                     window.open(link.url, '_blank', 'noopener,noreferrer')
                                 }
+                                className="cursor-pointer"
                             >
                                 <DynamicIcon
                                     name={(link.icon || 'link-2') as IconName}
