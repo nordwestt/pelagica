@@ -319,8 +319,8 @@ const UserMenu = () => {
     return (
         <DropdownMenu>
             <DropdownMenuTrigger asChild>
-                <Button variant="ghost" className="flex items-center gap-2 px-2 h-9">
-                    <Avatar className="h-7 w-7 rounded-lg">
+                <Button variant="ghost" size="sm" className="flex items-center gap-2 px-2">
+                    <Avatar className="h-6 w-6 rounded-lg">
                         <AvatarImage src={profileImageUrl} alt={userName} />
                         <AvatarFallback className="rounded-lg text-xs">{initials}</AvatarFallback>
                     </Avatar>
