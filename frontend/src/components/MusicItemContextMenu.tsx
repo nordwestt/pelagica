@@ -16,7 +16,7 @@ import { useFavorite } from '@/hooks/api/useFavorite';
 import { useAlbumTracks } from '@/hooks/api/useAlbumTracks';
 import { AddToPlaylistDialog } from '@/components/AddToPlaylistDialog';
 import type { MusicPlaybackTrack } from '@/context/MusicPlaybackContext';
-import { toPlaybackTrack, toPlaybackTracks } from '@/utils/musicPlaybackTrack';
+import { getMusicContextKind, toPlaybackTrack, toPlaybackTracks } from '@/utils/musicPlaybackTrack';
 
 interface MusicItemContextMenuProps {
     item: BaseItemDto;
@@ -38,47 +38,58 @@ const MusicItemContextMenu = ({
     const { loadQueue, loadQueueShuffled, addToQueueStart, addToQueueEnd } = useMusicPlayback();
     const { isFavorite, toggleFavorite, isLoading: isFavoriteLoading } = useFavorite(item.Id);
     const [playlistDialogOpen, setPlaylistDialogOpen] = useState(false);
+    const [playlistDialogItemIds, setPlaylistDialogItemIds] = useState<string[]>([]);
+
+    const resolvedKind = useMemo(() => getMusicContextKind(item.Type) ?? kind, [item.Type, kind]);
 
     const { data: albumTracks, isLoading: isLoadingAlbumTracks } = useAlbumTracks(
-        kind === 'album' ? item.Id : undefined
+        resolvedKind === 'album' ? item.Id : undefined
     );
 
     const tracks = useMemo(() => {
-        if (kind === 'album') {
+        if (resolvedKind === 'album') {
             return albumTracks ? toPlaybackTracks(albumTracks, item) : [];
         }
         if (contextTracks && contextTracks.length > 0) {
             return contextTracks;
         }
         return [toPlaybackTrack(item)];
-    }, [kind, albumTracks, item, contextTracks]);
+    }, [resolvedKind, albumTracks, item, contextTracks]);
+
+    const selectedTrack = useMemo(() => toPlaybackTrack(item), [item]);
 
     const playlistItemIds = useMemo(() => {
-        if (kind === 'album') {
-            return (albumTracks?.map((t) => t.Id!).filter(Boolean) as string[]) || [];
+        if (resolvedKind === 'album') {
+            return tracks.map((track) => track.id).filter(Boolean);
         }
         return item.Id ? [item.Id] : [];
-    }, [kind, albumTracks, item.Id]);
+    }, [resolvedKind, tracks, item.Id]);
 
     const actionsDisabled =
-        kind === 'album' ? isLoadingAlbumTracks || tracks.length === 0 : tracks.length === 0;
+        resolvedKind === 'album'
+            ? isLoadingAlbumTracks || tracks.length === 0
+            : !item.Id;
 
-    const playlistDisabled = actionsDisabled || (kind === 'album' && playlistItemIds.length === 0);
+    const playlistDisabled = actionsDisabled || playlistItemIds.length === 0;
 
     const handlePlayNow = () => {
         loadQueue(tracks, startIndex, true);
     };
 
     const handleShuffleNow = () => {
+        if (resolvedKind === 'song') {
+            loadQueueShuffled([selectedTrack], true);
+            return;
+        }
         loadQueueShuffled(tracks, true);
     };
 
     const handleAddToQueueStart = () => {
-        addToQueueStart(tracks);
+        addToQueueStart(resolvedKind === 'song' ? [selectedTrack] : tracks);
     };
 
     const handleAddToQueueEnd = () => {
-        addToQueueEnd(tracks);
+        addToQueueEnd(resolvedKind === 'song' ? [selectedTrack] : tracks);
     };
 
     const handleFavorite = () => {
@@ -87,7 +98,16 @@ const MusicItemContextMenu = ({
 
     const handleOpenPlaylistDialog = (e: Event) => {
         e.preventDefault();
+        if (playlistItemIds.length === 0) return;
+        setPlaylistDialogItemIds(playlistItemIds);
         setPlaylistDialogOpen(true);
+    };
+
+    const handlePlaylistDialogOpenChange = (open: boolean) => {
+        setPlaylistDialogOpen(open);
+        if (!open) {
+            setPlaylistDialogItemIds([]);
+        }
     };
 
     return (
@@ -141,8 +161,8 @@ const MusicItemContextMenu = ({
 
             <AddToPlaylistDialog
                 open={playlistDialogOpen}
-                onOpenChange={setPlaylistDialogOpen}
-                itemIds={playlistItemIds}
+                onOpenChange={handlePlaylistDialogOpenChange}
+                itemIds={playlistDialogItemIds}
             />
         </>
     );

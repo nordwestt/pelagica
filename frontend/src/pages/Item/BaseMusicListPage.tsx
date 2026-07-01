@@ -22,6 +22,7 @@ import MediaInfoDialog from '../../components/MediaInfoDialog';
 import { useState, useEffect, useMemo } from 'react';
 import ItemAdminButton from '@/components/ItemAdminButton';
 import MusicAlbumTrackRow from '@/components/MusicAlbumTrackRow';
+import MusicItemContextMenu from '@/components/MusicItemContextMenu';
 import { toPlaybackTracks } from '@/utils/musicPlaybackTrack';
 
 const MAX_ARTISTS_DISPLAYED = 5;
@@ -123,77 +124,86 @@ const BaseMusicListPage = ({
         }
     };
 
+    const showCollectionContextMenu = item.Type === 'MusicAlbum' || item.Type === 'Playlist';
+
+    const header = (
+        <div className="flex flex-col gap-4">
+            <div className="flex justify-start items-end-safe gap-4 w-full">
+                {!failedCover ? (
+                    <div className="relative">
+                        <img
+                            src={getPrimaryImageUrl(
+                                item.Id!,
+                                { width: 300, height: 300 },
+                                item.ImageTags?.Primary
+                            )}
+                            alt={item.Name + ' Cover'}
+                            className="relative w-32 h-32 object-contain rounded-md"
+                            onError={() => setFailedCover(true)}
+                        />
+                        <div className="absolute inset-0 rounded-md pointer-events-none poster-card-outline z-20" />
+                    </div>
+                ) : (
+                    <div className="relative w-32 h-32 bg-muted flex items-center justify-center rounded-md">
+                        <ImageOff className="text-muted-foreground" size={32} />
+                    </div>
+                )}
+                <div className="flex flex-col gap-0">
+                    <span className="text-sm text-muted-foreground">{listType}</span>
+                    <h1 className="text-3xl font-bold">{item.Name}</h1>
+                    <div className="flex flex-wrap gap-2 mt-1">
+                        {item.ArtistItems &&
+                            item.ArtistItems.slice(0, MAX_ARTISTS_DISPLAYED).map((artist) => (
+                                <Link
+                                    key={artist.Id}
+                                    to={getItemUrl('MusicArtist', artist.Id)}
+                                    className="bg-accent/20 rounded-full text-sm"
+                                >
+                                    {artist.Name}
+                                </Link>
+                            ))}
+                        {item.ArtistItems &&
+                            item.ArtistItems.length > MAX_ARTISTS_DISPLAYED && (
+                                <span className="text-sm text-muted-foreground">
+                                    {t('more_artists', {
+                                        count: item.ArtistItems.length - MAX_ARTISTS_DISPLAYED,
+                                    })}
+                                </span>
+                            )}
+                    </div>
+                    <div className="text-sm text-muted-foreground mt-1">
+                        {detailItems.join(' • ')}
+                    </div>
+                </div>
+            </div>
+            <div className="flex flex-wrap gap-2">
+                <Button onClick={handlePlayAlbum}>
+                    <Play />
+                    {t('play')}
+                </Button>
+                <FavoriteButton
+                    item={item}
+                    size={'icon'}
+                    showFavoriteButton={config.itemPage?.favoriteButton?.includes(item.Type!)}
+                />
+                <ItemAdminButton item={item} />
+            </div>
+        </div>
+    );
+
     return (
         <div className="relative h-full w-full">
             <div className={`relative z-10`}>
                 <div
                     className={`bg-background/30 backdrop-blur-md p-3 rounded-md w-full flex flex-col gap-4`}
                 >
-                    <div className="flex justify-start items-end-safe gap-4 w-full">
-                        {!failedCover ? (
-                            <div className="relative">
-                                <img
-                                    src={getPrimaryImageUrl(
-                                        item.Id!,
-                                        { width: 300, height: 300 },
-                                        item.ImageTags?.Primary
-                                    )}
-                                    alt={item.Name + ' Cover'}
-                                    className="relative w-32 h-32 object-contain rounded-md"
-                                    onError={() => setFailedCover(true)}
-                                />
-                                <div className="absolute inset-0 rounded-md pointer-events-none poster-card-outline z-20" />
-                            </div>
-                        ) : (
-                            <div className="relative w-32 h-32 bg-muted flex items-center justify-center rounded-md">
-                                <ImageOff className="text-muted-foreground" size={32} />
-                            </div>
-                        )}
-                        <div className="flex flex-col gap-0">
-                            <span className="text-sm text-muted-foreground">{listType}</span>
-                            <h1 className="text-3xl font-bold">{item.Name}</h1>
-                            <div className="flex flex-wrap gap-2 mt-1">
-                                {item.ArtistItems &&
-                                    item.ArtistItems.slice(0, MAX_ARTISTS_DISPLAYED).map(
-                                        (artist) => (
-                                            <Link
-                                                key={artist.Id}
-                                                to={getItemUrl('MusicArtist', artist.Id)}
-                                                className="bg-accent/20 rounded-full text-sm"
-                                            >
-                                                {artist.Name}
-                                            </Link>
-                                        )
-                                    )}
-                                {item.ArtistItems &&
-                                    item.ArtistItems.length > MAX_ARTISTS_DISPLAYED && (
-                                        <span className="text-sm text-muted-foreground">
-                                            {t('more_artists', {
-                                                count:
-                                                    item.ArtistItems.length - MAX_ARTISTS_DISPLAYED,
-                                            })}
-                                        </span>
-                                    )}
-                            </div>
-                            <div className="text-sm text-muted-foreground mt-1">
-                                {detailItems.join(' • ')}
-                            </div>
-                        </div>
-                    </div>
-                    <div className="flex flex-wrap gap-2">
-                        <Button onClick={handlePlayAlbum}>
-                            <Play />
-                            {t('play')}
-                        </Button>
-                        <FavoriteButton
-                            item={item}
-                            size={'icon'}
-                            showFavoriteButton={config.itemPage?.favoriteButton?.includes(
-                                item.Type!
-                            )}
-                        />
-                        <ItemAdminButton item={item} />
-                    </div>
+                    {showCollectionContextMenu ? (
+                        <MusicItemContextMenu item={item} kind="album">
+                            {header}
+                        </MusicItemContextMenu>
+                    ) : (
+                        header
+                    )}
                     {isLoadingAlbumTracks && (
                         <div className="flex flex-col gap-0">
                             <div className="flex items-center p-2 px-8 group text-muted-foreground">
