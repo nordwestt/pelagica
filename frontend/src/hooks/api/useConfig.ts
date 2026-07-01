@@ -346,10 +346,10 @@ const DEFAULT_CONFIG: AppConfig = {
     ],
 };
 
-const CONFIG_QUERY_KEY = ['config'] as const;
-
 const fetchConfig = async (): Promise<AppConfig> => {
-    const response = await fetch('/api/config');
+    const response = await fetch(
+        '/api/config?jellyfin_url=' + encodeURIComponent(getServerUrl() || '')
+    );
     if (!response.ok) {
         console.warn('Config file not found, using default configuration');
         return DEFAULT_CONFIG;
@@ -368,7 +368,7 @@ const fetchConfig = async (): Promise<AppConfig> => {
 
 export const useConfig = () => {
     const { data, isLoading, error } = useQuery({
-        queryKey: CONFIG_QUERY_KEY,
+        queryKey: ['config', getServerUrl()],
         queryFn: fetchConfig,
         staleTime: Infinity,
         gcTime: 30 * 60 * 1000, // 30 minutes
@@ -402,7 +402,7 @@ export const useUpdateConfig = () => {
             }
         },
         onSuccess: (_data, newConfig) => {
-            queryClient.setQueryData(CONFIG_QUERY_KEY, {
+            queryClient.setQueryData(['config', getServerUrl()], {
                 ...DEFAULT_CONFIG,
                 ...newConfig,
                 itemPage: {
