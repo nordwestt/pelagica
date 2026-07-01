@@ -45,7 +45,7 @@ const MusicAlbumCard = ({
     );
 
     return (
-        <MusicItemContextMenu item={album} kind="album">
+        <MusicItemContextMenu item={album}>
             <Link
                 to={getItemUrl(album.Type, album.Id)}
                 className={cn('group flex flex-col p-0 m-0', className)}

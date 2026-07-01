@@ -138,8 +138,6 @@ const BaseMusicListPage = ({
         }
     };
 
-    const showCollectionContextMenu = item.Type === 'MusicAlbum' || item.Type === 'Playlist';
-
     const header = (
         <div className="flex flex-col gap-4">
             <div className="flex justify-start items-end-safe gap-4 w-full">
@@ -211,13 +209,7 @@ const BaseMusicListPage = ({
                 <div
                     className={`bg-background/30 backdrop-blur-md p-3 rounded-md w-full flex flex-col gap-4`}
                 >
-                    {showCollectionContextMenu ? (
-                        <MusicItemContextMenu item={item} kind="album">
-                            {header}
-                        </MusicItemContextMenu>
-                    ) : (
-                        header
-                    )}
+                    <MusicItemContextMenu item={item}>{header}</MusicItemContextMenu>
                     {isLoadingAlbumTracks && (
                         <div className="flex flex-col gap-0">
                             <div className="flex items-center p-2 px-8 group text-muted-foreground">

@@ -16,7 +16,7 @@ import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router';
 import ItemPagination from '@/components/ItemPagination';
 import { getItemUrl } from '@/utils/itemUrl';
-import { MusicAlbumContextMenuWrapper } from '@/components/MusicItemContextMenu';
+import MusicItemContextMenu from '@/components/MusicItemContextMenu';
 import {
     Select,
     SelectContent,
@@ -57,7 +57,7 @@ const ItemDisplay = ({ item, aspectClass, overlay, linkUrl }: ItemDisplayProps) 
     const resolvedLinkUrl = linkUrl ?? getItemUrl(item.Type, item.Id) ?? `/item/${item.Id}`;
 
     return (
-        <MusicAlbumContextMenuWrapper item={item}>
+        <MusicItemContextMenu item={item}>
             <Link to={resolvedLinkUrl} key={item.Id} className="p-0 m-0">
                 <div className={`relative w-full ${aspectClass} overflow-hidden rounded-md group`}>
                     {!posterError ? (
@@ -89,7 +89,7 @@ const ItemDisplay = ({ item, aspectClass, overlay, linkUrl }: ItemDisplayProps) 
                     </span>
                 )}
             </Link>
-        </MusicAlbumContextMenuWrapper>
+        </MusicItemContextMenu>
     );
 };
 

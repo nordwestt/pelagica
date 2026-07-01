@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useMemo, useState, type ReactNode } from 'react';
 import type { BaseItemDto } from '@jellyfin/sdk/lib/generated-client/models';
 import {
     ContextMenu,
@@ -16,23 +16,94 @@ import { useFavorite } from '@/hooks/api/useFavorite';
 import { useAlbumTracks } from '@/hooks/api/useAlbumTracks';
 import { AddToPlaylistDialog } from '@/components/AddToPlaylistDialog';
 import type { MusicPlaybackTrack } from '@/context/MusicPlaybackContext';
-import { getMusicContextKind, toPlaybackTrack, toPlaybackTracks } from '@/utils/musicPlaybackTrack';
+import {
+    getMusicContextKind,
+    isCollectionScope,
+    toPlaybackTrack,
+    toPlaybackTracks,
+    type MusicContextMenuScope,
+} from '@/utils/musicPlaybackTrack';
 
-interface MusicItemContextMenuProps {
+export interface MusicContextMenuActions {
+    playNow?: boolean;
+    shuffle?: boolean;
+    queueStart?: boolean;
+    queueEnd?: boolean;
+    playlist?: boolean;
+    favorite?: boolean;
+}
+
+export const DEFAULT_MUSIC_CONTEXT_MENU_ACTIONS: Required<MusicContextMenuActions> = {
+    playNow: true,
+    shuffle: true,
+    queueStart: true,
+    queueEnd: true,
+    playlist: true,
+    favorite: true,
+};
+
+export interface MusicItemContextMenuProps {
     item: BaseItemDto;
-    kind: 'song' | 'album';
+    children: ReactNode;
+    /** Override scope inferred from `item.Type`. */
+    scope?: MusicContextMenuScope;
+    /** Tracks surrounding the selected item when playing from a list. */
     contextTracks?: MusicPlaybackTrack[];
+    /** Index of `item` within `contextTracks` for play-now. */
     startIndex?: number;
-    children: React.ReactNode;
+    /** Toggle individual menu actions. Defaults to all enabled. */
+    actions?: MusicContextMenuActions;
+}
+
+function resolveActions(actions?: MusicContextMenuActions): Required<MusicContextMenuActions> {
+    return { ...DEFAULT_MUSIC_CONTEXT_MENU_ACTIONS, ...actions };
 }
 
 const MusicItemContextMenu = ({
     item,
-    kind,
+    children,
+    scope,
     contextTracks,
     startIndex = 0,
-    children,
+    actions,
 }: MusicItemContextMenuProps) => {
+    const resolvedScope = scope ?? getMusicContextKind(item.Type);
+    const resolvedActions = resolveActions(actions);
+
+    if (!resolvedScope) {
+        return children;
+    }
+
+    return (
+        <MusicItemContextMenuContent
+            item={item}
+            scope={resolvedScope}
+            contextTracks={contextTracks}
+            startIndex={startIndex}
+            actions={resolvedActions}
+        >
+            {children}
+        </MusicItemContextMenuContent>
+    );
+};
+
+interface MusicItemContextMenuContentProps {
+    item: BaseItemDto;
+    scope: MusicContextMenuScope;
+    contextTracks?: MusicPlaybackTrack[];
+    startIndex: number;
+    actions: Required<MusicContextMenuActions>;
+    children: ReactNode;
+}
+
+const MusicItemContextMenuContent = ({
+    item,
+    scope,
+    contextTracks,
+    startIndex,
+    actions,
+    children,
+}: MusicItemContextMenuContentProps) => {
     const { t } = useTranslation('music');
     const { t: tItem } = useTranslation('item');
     const { loadQueue, loadQueueShuffled, addToQueueStart, addToQueueEnd } = useMusicPlayback();
@@ -40,44 +111,47 @@ const MusicItemContextMenu = ({
     const [playlistDialogOpen, setPlaylistDialogOpen] = useState(false);
     const [playlistDialogItemIds, setPlaylistDialogItemIds] = useState<string[]>([]);
 
-    const resolvedKind = useMemo(() => getMusicContextKind(item.Type) ?? kind, [item.Type, kind]);
+    const isSong = scope === 'song';
+    const isCollection = isCollectionScope(scope);
 
-    const { data: albumTracks, isLoading: isLoadingAlbumTracks } = useAlbumTracks(
-        resolvedKind === 'album' ? item.Id : undefined
+    const { data: collectionTracks, isLoading: isLoadingCollectionTracks } = useAlbumTracks(
+        isCollection ? item.Id : undefined
     );
 
     const tracks = useMemo(() => {
-        if (resolvedKind === 'album') {
-            return albumTracks ? toPlaybackTracks(albumTracks, item) : [];
+        if (isCollection) {
+            return collectionTracks ? toPlaybackTracks(collectionTracks, item) : [];
         }
         if (contextTracks && contextTracks.length > 0) {
             return contextTracks;
         }
         return [toPlaybackTrack(item)];
-    }, [resolvedKind, albumTracks, item, contextTracks]);
+    }, [isCollection, collectionTracks, item, contextTracks]);
 
     const selectedTrack = useMemo(() => toPlaybackTrack(item), [item]);
 
     const playlistItemIds = useMemo(() => {
-        if (resolvedKind === 'album') {
+        if (isCollection) {
             return tracks.map((track) => track.id).filter(Boolean);
         }
         return item.Id ? [item.Id] : [];
-    }, [resolvedKind, tracks, item.Id]);
+    }, [isCollection, tracks, item.Id]);
 
-    const actionsDisabled =
-        resolvedKind === 'album'
-            ? isLoadingAlbumTracks || tracks.length === 0
-            : !item.Id;
+    const playbackDisabled = isCollection
+        ? isLoadingCollectionTracks || tracks.length === 0
+        : !item.Id;
 
-    const playlistDisabled = actionsDisabled || playlistItemIds.length === 0;
+    const playlistDisabled = playbackDisabled || playlistItemIds.length === 0;
+
+    const showAddToSubmenu =
+        actions.queueStart || actions.queueEnd || actions.playlist;
 
     const handlePlayNow = () => {
         loadQueue(tracks, startIndex, true);
     };
 
     const handleShuffleNow = () => {
-        if (resolvedKind === 'song') {
+        if (isSong) {
             loadQueueShuffled([selectedTrack], true);
             return;
         }
@@ -85,11 +159,11 @@ const MusicItemContextMenu = ({
     };
 
     const handleAddToQueueStart = () => {
-        addToQueueStart(resolvedKind === 'song' ? [selectedTrack] : tracks);
+        addToQueueStart(isSong ? [selectedTrack] : tracks);
     };
 
     const handleAddToQueueEnd = () => {
-        addToQueueEnd(resolvedKind === 'song' ? [selectedTrack] : tracks);
+        addToQueueEnd(isSong ? [selectedTrack] : tracks);
     };
 
     const handleFavorite = () => {
@@ -115,98 +189,73 @@ const MusicItemContextMenu = ({
             <ContextMenu>
                 <ContextMenuTrigger asChild>{children}</ContextMenuTrigger>
                 <ContextMenuContent className="w-52">
-                    <ContextMenuItem disabled={actionsDisabled} onSelect={handlePlayNow}>
-                        <Play />
-                        {t('play_now')}
-                    </ContextMenuItem>
-                    <ContextMenuItem disabled={actionsDisabled} onSelect={handleShuffleNow}>
-                        <Shuffle />
-                        {t('shuffle_now')}
-                    </ContextMenuItem>
-                    <ContextMenuSub>
-                        <ContextMenuSubTrigger disabled={actionsDisabled}>
-                            <ListPlus />
-                            {t('add_to')}
-                        </ContextMenuSubTrigger>
-                        <ContextMenuSubContent className="w-48">
-                            <ContextMenuItem
-                                disabled={actionsDisabled}
-                                onSelect={handleAddToQueueStart}
-                            >
-                                <ListStart />
-                                {t('queue_start')}
-                            </ContextMenuItem>
-                            <ContextMenuItem
-                                disabled={actionsDisabled}
-                                onSelect={handleAddToQueueEnd}
-                            >
-                                <ListEnd />
-                                {t('queue_end')}
-                            </ContextMenuItem>
-                            <ContextMenuItem
-                                disabled={playlistDisabled}
-                                onSelect={handleOpenPlaylistDialog}
-                            >
-                                <ListMusic />
-                                {t('playlist')}
-                            </ContextMenuItem>
-                        </ContextMenuSubContent>
-                    </ContextMenuSub>
-                    <ContextMenuItem disabled={isFavoriteLoading} onSelect={handleFavorite}>
-                        <Heart fill={isFavorite ? 'currentColor' : 'none'} />
-                        {isFavorite ? tItem('unfavorite') : tItem('favorite')}
-                    </ContextMenuItem>
+                    {actions.playNow && (
+                        <ContextMenuItem disabled={playbackDisabled} onSelect={handlePlayNow}>
+                            <Play />
+                            {t('play_now')}
+                        </ContextMenuItem>
+                    )}
+                    {actions.shuffle && (
+                        <ContextMenuItem disabled={playbackDisabled} onSelect={handleShuffleNow}>
+                            <Shuffle />
+                            {t('shuffle_now')}
+                        </ContextMenuItem>
+                    )}
+                    {showAddToSubmenu && (
+                        <ContextMenuSub>
+                            <ContextMenuSubTrigger disabled={playbackDisabled}>
+                                <ListPlus />
+                                {t('add_to')}
+                            </ContextMenuSubTrigger>
+                            <ContextMenuSubContent className="w-48">
+                                {actions.queueStart && (
+                                    <ContextMenuItem
+                                        disabled={playbackDisabled}
+                                        onSelect={handleAddToQueueStart}
+                                    >
+                                        <ListStart />
+                                        {t('queue_start')}
+                                    </ContextMenuItem>
+                                )}
+                                {actions.queueEnd && (
+                                    <ContextMenuItem
+                                        disabled={playbackDisabled}
+                                        onSelect={handleAddToQueueEnd}
+                                    >
+                                        <ListEnd />
+                                        {t('queue_end')}
+                                    </ContextMenuItem>
+                                )}
+                                {actions.playlist && (
+                                    <ContextMenuItem
+                                        disabled={playlistDisabled}
+                                        onSelect={handleOpenPlaylistDialog}
+                                    >
+                                        <ListMusic />
+                                        {t('playlist')}
+                                    </ContextMenuItem>
+                                )}
+                            </ContextMenuSubContent>
+                        </ContextMenuSub>
+                    )}
+                    {actions.favorite && (
+                        <ContextMenuItem disabled={isFavoriteLoading} onSelect={handleFavorite}>
+                            <Heart fill={isFavorite ? 'currentColor' : 'none'} />
+                            {isFavorite ? tItem('unfavorite') : tItem('favorite')}
+                        </ContextMenuItem>
+                    )}
                 </ContextMenuContent>
             </ContextMenu>
 
-            <AddToPlaylistDialog
-                open={playlistDialogOpen}
-                onOpenChange={handlePlaylistDialogOpenChange}
-                itemIds={playlistDialogItemIds}
-            />
+            {actions.playlist && (
+                <AddToPlaylistDialog
+                    open={playlistDialogOpen}
+                    onOpenChange={handlePlaylistDialogOpenChange}
+                    itemIds={playlistDialogItemIds}
+                />
+            )}
         </>
     );
 };
 
 export default MusicItemContextMenu;
-
-export function MusicAlbumContextMenuWrapper({
-    item,
-    children,
-}: {
-    item?: BaseItemDto;
-    children: React.ReactNode;
-}) {
-    if (item?.Type !== 'MusicAlbum') return children;
-
-    return (
-        <MusicItemContextMenu item={item} kind="album">
-            {children}
-        </MusicItemContextMenu>
-    );
-}
-
-export function MusicSongContextMenuWrapper({
-    item,
-    contextTracks,
-    startIndex = 0,
-    children,
-}: {
-    item?: BaseItemDto;
-    contextTracks?: MusicPlaybackTrack[];
-    startIndex?: number;
-    children: React.ReactNode;
-}) {
-    if (item?.Type !== 'Audio' || !item) return children;
-
-    return (
-        <MusicItemContextMenu
-            item={item}
-            kind="song"
-            contextTracks={contextTracks}
-            startIndex={startIndex}
-        >
-            {children}
-        </MusicItemContextMenu>
-    );
-}

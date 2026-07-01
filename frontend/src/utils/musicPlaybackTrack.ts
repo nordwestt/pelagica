@@ -1,10 +1,16 @@
 import type { BaseItemDto } from '@jellyfin/sdk/lib/generated-client/models';
 import type { MusicPlaybackTrack } from '@/context/MusicPlaybackContext';
 
-export function getMusicContextKind(type?: string): 'song' | 'album' | null {
+export type MusicContextMenuScope = 'song' | 'collection';
+
+export function getMusicContextKind(type?: string): MusicContextMenuScope | null {
     if (type === 'Audio') return 'song';
-    if (type === 'MusicAlbum') return 'album';
+    if (type === 'MusicAlbum' || type === 'Playlist') return 'collection';
     return null;
+}
+
+export function isCollectionScope(scope: MusicContextMenuScope): boolean {
+    return scope === 'collection';
 }
 
 export function getAlbumArtistName(album: BaseItemDto): string {
