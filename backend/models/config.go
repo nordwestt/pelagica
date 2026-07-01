@@ -15,7 +15,9 @@ type AppConfig struct {
 	WatchedStateBadgeSearch     *bool               `json:"watchedStateBadgeSearch,omitempty"`
 	ServerThemeId               string              `json:"serverThemeId,omitempty"`
 	ServerName                  string              `json:"serverName,omitempty"`
+	ShowLogoInTopBar            *bool               `json:"showLogoInTopBar,omitempty"`
 	Links                       []ConfigLink        `json:"links,omitempty"`
+	HideBackToServerButton      *bool               `json:"hideBackToServerButton,omitempty"`
 }
 
 type ConfigLink struct {
@@ -35,6 +37,7 @@ type HomeScreenSection struct {
 	Items               *SectionItemsConfig `json:"items,omitempty"`
 	ShowFavoriteButton  *bool               `json:"showFavoriteButton,omitempty"`
 	ShowWatchlistButton *bool               `json:"showWatchlistButton,omitempty"`
+	AutoPlayTrailers    *bool               `json:"autoPlayTrailers,omitempty"`
 	Size                string              `json:"size,omitempty"`
 
 	// RecentlyAdded
@@ -42,8 +45,9 @@ type HomeScreenSection struct {
 	LibraryIDs []string `json:"libraryIds,omitempty"`
 
 	// Items section
-	AllLink      string        `json:"allLink,omitempty"`
-	DetailFields []DetailField `json:"detailFields,omitempty"`
+	AllLink       string        `json:"allLink,omitempty"`
+	DetailFields  []DetailField `json:"detailFields,omitempty"`
+	UseThumbImage *bool         `json:"useThumbImage,omitempty"`
 
 	// Continue / Resume / NextUp
 	DetailLine []ContinueWatchingDetailLine `json:"detailLine,omitempty"`

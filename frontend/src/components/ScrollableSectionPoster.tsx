@@ -7,6 +7,7 @@ import { useConfig } from '@/hooks/api/useConfig';
 import WatchedStateBadge from './WatchedStateBadge';
 import { MusicAlbumContextMenuWrapper } from '@/components/MusicItemContextMenu';
 import { useState, type ReactNode } from 'react';
+import PosterTrailerVideo from './PosterTrailerVideo';
 import { Eye, ImageOff, Play } from 'lucide-react';
 
 interface ScrollableSectionPosterProps {
@@ -16,6 +17,8 @@ interface ScrollableSectionPosterProps {
     itemName?: string;
     itemId?: string;
     className?: string;
+    forceLandscape?: boolean;
+    autoPlayTrailers?: boolean;
 }
 
 const ScrollableSectionPoster = ({
@@ -25,15 +28,25 @@ const ScrollableSectionPoster = ({
     itemName,
     itemId,
     className,
+    forceLandscape,
+    autoPlayTrailers,
 }: ScrollableSectionPosterProps) => {
     const { config } = useConfig();
     const navigate = useNavigate();
     const [posterFailed, setPosterFailed] = useState(false);
+    const [hovered, setHovered] = useState(false);
+
+    const hasLocalTrailers = (item?.LocalTrailerCount ?? 0) > 0;
+    const showTrailerOnHover = autoPlayTrailers && hasLocalTrailers;
 
     const isArtist = item?.Type === 'MusicArtist';
-    const isSquareType = item?.Type === 'Playlist' || item?.Type === 'MusicAlbum' || isArtist;
+    const isSquareType =
+        !forceLandscape && (item?.Type === 'Playlist' || item?.Type === 'MusicAlbum' || isArtist);
     const isLandscapeType =
-        item?.Type === 'MusicVideo' || item?.Type === 'Video' || item?.Type === 'Photo';
+        forceLandscape ||
+        item?.Type === 'MusicVideo' ||
+        item?.Type === 'Video' ||
+        item?.Type === 'Photo';
     const isDirectPlay =
         item?.Type === 'MusicVideo' || item?.Type === 'Video' || item?.Type === 'Photo';
 
@@ -108,7 +121,11 @@ const ScrollableSectionPoster = ({
 
     return wrapWithMenu(
         <Link to={linkTo} key={id} className={className}>
-            <div className={`relative overflow-hidden ${roundedClass} group ${posterClasses}`}>
+            <div
+                className={`relative overflow-hidden ${roundedClass} group ${posterClasses}`}
+                onMouseEnter={() => setHovered(true)}
+                onMouseLeave={() => setHovered(false)}
+            >
                 <img
                     key={itemId || item?.Id}
                     src={
@@ -125,6 +142,13 @@ const ScrollableSectionPoster = ({
                     loading="lazy"
                     onError={() => setPosterFailed(true)}
                 />
+                {showTrailerOnHover && item?.Id && (
+                    <PosterTrailerVideo
+                        itemId={item.Id}
+                        hovered={hovered}
+                        roundedClass={roundedClass}
+                    />
+                )}
                 <Skeleton className={`absolute bottom-0 left-0 right-0 ${skeletonClasses} -z-1`} />
                 {isDirectPlay && (
                     <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity z-20">
