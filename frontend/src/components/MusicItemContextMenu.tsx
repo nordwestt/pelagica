@@ -80,6 +80,7 @@ const MusicItemContextMenuContent = ({
     const { isFavorite, toggleFavorite, isLoading: isFavoriteLoading } = useFavorite(item.Id);
     const [playlistDialogOpen, setPlaylistDialogOpen] = useState(false);
     const [playlistDialogItemIds, setPlaylistDialogItemIds] = useState<string[]>([]);
+    const [contextMenuOpen, setContextMenuOpen] = useState(false);
 
     const isSong = scope === 'song';
     const isCollection = isCollectionScope(scope);
@@ -142,6 +143,7 @@ const MusicItemContextMenuContent = ({
     const handleOpenPlaylistDialog = (e: Event) => {
         e.preventDefault();
         if (playlistItemIds.length === 0) return;
+        setContextMenuOpen(false);
         setPlaylistDialogItemIds(playlistItemIds);
         setPlaylistDialogOpen(true);
     };
@@ -155,7 +157,7 @@ const MusicItemContextMenuContent = ({
 
     return (
         <>
-            <ContextMenu>
+            <ContextMenu open={contextMenuOpen} onOpenChange={setContextMenuOpen}>
                 <ContextMenuTrigger asChild>{children}</ContextMenuTrigger>
                 <ContextMenuContent className="w-52">
                     {actions.playNow && (
